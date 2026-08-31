@@ -1,0 +1,186 @@
+#Két féle eredmény is van, ezért külön kezeljük őket.
+#kérdés:
+#Hogy juttatjuk át mindkettőt ugyanazon a teszten, úgy hogy ne ismételjük magunkat.
+#Írjunk belső függvényt?
+#Ide akár megírhatnánk az enpassantot is később.
+#Csináljuk meg csak a balra ütést, ha kész utána nézzük meg a jobbra ütést.
+#valami jó matematikát kitalálni a balra jobbra ütésre
+#A visszatérési érték egy halmaz is lehetne, mert pl majd
+#más bábuknál egy lépésnél nem egyetlen hely van ahova léphetnek
+#hanem többre is
+#és akkor ott majd azt kell levizsgálni, hogy benne van a megadott lépés
+#az egyik szabályos lépés halmazával.
+#szóval lehet elevee hivás feltételezés, hogy minden
+#opcionálisan jó koordinátáról konkrét hiba jelzést vissza adni
+#jó, ezt mondjuk nehéz megfogalmazni
+#gyalog ütésnél csak balra és jobbra tud ütni, ez kettő szabályos koordináta.
+#de egy bástyánál pályán belül nagyon sok koordinátára üthet, léphet
+#és ott is kéne írni egy algoritmus ami átpásztázza a sorába és oszlopába 
+#tartozó koordinátákat, értelemszerűen a túlmenne a pályán a legelső, onnan tovább már nem vizsgál semmit.
+#de erre kéne valami univerzális megoldás, hogy következetesek legyünk,
+#amit itt gyalognál csinálunk, úgy oldjuk meg a bástyánál.
+#A bábuk belső osztályából, ami nem a felhasználó inputot kezeli, az összes hiba üzenetet kivágjuk.
+
+gyalog enpassant.
+kell a játék osztályba egy lépés tároló, így lehet majd eldönteni, hogy az passant az érvényes
+
+A játék osztályt táblára átnevezni,
+az input bekérőhöz csinálni egy külön játék osztályt.
+Oda felvenni a többi játékos nevét.
+#Kell valamai adatszerkezet és algoritmus a lépések tárolására, az enpassant, sáncolás, játék elmentés miatt.
+#Ez az egyik legfontosabb, ha ez megvan, akkor enpassant is tudunk csinálni.
+
+
+A duplalépés, sáncok egyszerűen annyiból megvalósíthatók, hogy a bábuk tárolják a korábbi koordinátáit, de az enpassant miatt kell a lépéstörténet, meg a visszanézhetőség miatt fontos.
+
+A lépés történet tárolása meg a visszanézhetőség miatt fontos.
+Amit fixen el kell tárolni ilyenkor:
+Honnan, hova, melyik bábu lépett, színű.
+
+Ami szerintem teljesen fölösleges, az a duplalépés történt e, gyalog esetén(egyszerűen a korábbi koordinátái számából ezt kilehet számolni). A sáncot pedig külön kell jelölni, mert a honnan hovánál csak 1 bábu lépését lehet letárolni, de a sáncnál 2 bábu lépését kéne letárolni. 
+
+Ami kérdéses, melyik bábu lépett már korábban, nem értem itt mire gondolsz, ütött bábu meg érdekes, talán jól jöhet. Az állás hash-t meg még nem ismerem
+
+
+Valamilyen lineáris adatszerkezet:
+-   Honnan
+-   hova
+-   Bábutípus
+-   Bábuszín
+
+kérdéses:
+Ütött bábu
+enpassant
+sánc
+átváltozás
+
+ötlet
+-   sakk adás jelölése
+-   matt adás jelölése
+
+
+
+Muvelettipus:
+
+    -Lepes:
+    -   Honnan1
+    -   Hova1
+    -   Bábutípus1
+    -   Bábuszín
+
+    -Utes:
+    -   Honnan1
+    -   Hova1
+    -   Bábutípus1
+    -   Bábuszín
+    -   Levett bábutípusa
+
+    -Enpassant:
+    -   Honnan1
+    -   Hova1
+    -   Bábutípus1
+    -   Bábuszín
+    -   Levett bábutípusa
+    -   Levett bábukoordinátája
+
+    -Gyalog átváltozás:
+    -   Honnan1
+    -   Hova1
+    -   Bábutípus1
+    -   Bábuszín
+    -   Átváltozott bábu
+
+
+    -Sánc:
+    -   Sánc típusa(Rövid, hosszú)
+    -   Bábuszín
+    -   Bábutípus1
+    -   Honnan1
+    -   Hova1
+    -   Bubutípus2
+    -   Honnan2
+    -   Hova2
+
+
+
+
+
+Adatszerkezet:
+
+    Külsőleg lista
+    Belsőleg szótárak.
+
+
+dataclassnak utananezni, jocucc
+
+
+
+a 3 megoldást használom. mi ez a dataclass?A dataclass (adatclass) egy olyan beépített Python eszköz (a 3.7-es verzió óta), amivel rendkívül gyorsan és kevés kóddal hozhatsz létre olyan osztályokat, amelyek csak adattárolásra szolgálnak.Ha egy sima osztályt írnál az adatoknak, rengeteg ismétlődő kódot (úgynevezett boilerplate kódot) kellene legépelned. A @dataclass dekorátor ezt automatikusan megcsinálja helyetted a háttérben.Miért jobb, mint egy sima osztály? (Példa)A hagyományos módszer (sok gépelés):pythonclass HagyomanyosFelhasznalo:
+    def __init__(self, id: int, nev: str, email: str = None):
+        self.id = id
+        self.nev = nev
+        self.email = email
+
+    def __repr__(self):
+        return f"HagyomanyosFelhasznalo(id={self.id}, nev='{self.nev}', email='{self.email}')"
+Körültekintően használja a kódot.A dataclass módszer (ugyanaz, de sokkal tisztább):pythonfrom dataclasses import dataclass
+
+@dataclass
+class Felhasznalo:
+    id: int
+    nev: str
+    email: str = None  # Alapértelmezett érték, így opcionális
+Körültekintően használja a kódot.Mit ad neked automatikusan a dataclass?Automatikus __init__: Nem kell kiírnod a self.id = id sorokat. A háttérben legenerálja a konstruktort.Szép kiíratás (__repr__): Ha a mentő metódusodban rányomtatsz egy print(user)-t, nem egy olvashatatlan memória-címet kapsz, hanem ezt: Felhasznalo(id=42, nev='Péter', email=None).Könnyű összehasonlítás: Két azonos adatokkal rendelkező objektumot simán összehasonlíthatsz az == jellel, és True-t kapsz. Sima osztálynál ez False lenne.Hogyan alakíthatod át könnyen a mentő metódusodhoz?Ha a mentő metódusod adatbázisba vagy JSON-be ment, a dataclass objektumot egyetlen mozdulattal átalakíthatod hagyományos Python szótárrá (dictionary) az asdict függvénnyel:pythonfrom dataclasses import dataclass, asdict
+
+@dataclass
+class MentesiAdat:
+    fajlnev: str
+    meret: int
+    biztonsagi_mentes: bool = True
+
+def ment_objektum(adat: MentesiAdat):
+    # Átalakítás szótárrá: {'fajlnev': 'adatok.txt', 'meret': 1024, 'biztonsagi_mentes': True}
+    tiszta_szotar = asdict(adat) 
+    
+    print(f"Mentés folyamatban... Fájl: {tiszta_szotar['fajlnev']}")
+    # Itt mehet az adatbázisba vagy fájlba írás...
+
+# Használat:
+mentendo_infok = MentesiAdat(fajlnev="config.json", meret=512)
+ment_objektum(mentendo_infok)
+Körültekintően használja a kódot.Mikor érdemes használni?Mindig, amikor a mentő metódusodnak összetartozó, fix szerkezetű adatokat akarsz átadni (például egy felhasználó adatai, egy tranzakció részletei vagy egy termék paraméterei), és szeretnéd, hogy a fejlesztőkörnyezeted (pl. VS Code, PyCharm) automatikusan kiegészítse a változóneveket gépelés közben.Szeretnéd látni, hogyan lehet a te konkrét mentendő adataidat átültetni egy ilyen dataclass-ba? Megírhatod, hogy milyen mezőket kell most elmentened!Az AI-válaszokban előfordulhatnak hibák. További információolyan lehet csinálni, hogy egy adat objektum egy ősosztály, és a leszármazottnak lesznek függvényei?Igen, tökéletesen működik! A dataclass egy teljesen normális Python osztály, így ugyanúgy örökölhet, mint bármilyen más osztály.A mintádban az adat-objektum lesz az ősosztály, a leszármazott osztály pedig megörökli az összes adatmezőt, és te tetszőleges függvényeket (metódusokat) adhatsz hozzá.Itt van egy gyakorlati példa, hogyan néz ki ez a mentési logikában:Kód példa: Ősosztály mint adat, leszármazott metódusokkalpythonfrom dataclasses import dataclass
+
+# 1. AZ ŐSOSZTÁLY: Csak az adatokat tárolja (Séma)
+@dataclass
+class MentesAdatBase:
+    fajlnev: str
+    meret_kb: int
+    tipus: str
+
+# 2. A LESZÁRMAZOTT: Megörökli az adatokat, és kap saját függvényeket
+@dataclass
+class MentendoFajl(MentesAdatBase):
+    
+    # Új függvény a leszármazottban
+    def ellenoriz_meret(self) -> bool:
+        if self.meret_kb > 10240:  # 10 MB limit
+            print(f"Figyelem: A(z) {self.fajlnev} túl nagy!")
+            return False
+        return True
+
+    # Egy másik függvény, ami elvégzi a mentést
+    def ment(self):
+        if self.ellenoriz_meret():
+            print(f"[{self.tipus.upper()}] Sikeresen mentve: {self.fajlnev}")
+Körültekintően használja a kódot.Hogyan működik ez a gyakorlatban?Amikor létrehozod a leszármazott objektumot, az ősosztály paramétereit kell neki átadnod:python# Létrehozzuk a leszármazottat az ősosztály adataival
+doksi = MentendoFajl(fajlnev="riport.pdf", meret_kb=500, tipus="pdf")
+
+# Elérjük a leszármazott saját függvényét
+doksi.ment()
+# Kiírás: [PDF] Sikeresen mentve: riport.pdf
+
+# Kipróbáljuk egy túl nagy fájllal
+nagy_video = MentendoFajl(fajlnev="nyaralas.mp4", meret_kb=95000, tipus="video")
+nagy_video.ment()
+# Kiírás: Figyelem: A(z) nyaralas.mp4 túl nagy!
+Körültekintően használja a kódot.Fontos szabály, amire figyelned kell (Alapértelmezett értékek):Ha az ősosztályban egy mezőnek adsz alapértelmezett értéket (pl. tipus: str = "txt"), akkor a leszármazottban lévő összes új mezőnek is kötelezően kell hogy legyen alapértelmezett értéke. A Python nem engedi, hogy egy kötelező mező egy opcionális mező után álljon a konstruktorban.Milyen függvényeket tervezel tenni a leszármazott osztályba? Ha megírod a logikát, segíthetek pontosan összefésülni az ősosztállyal!Az AI-válaszokban előfordulhatnak hibák. További információ

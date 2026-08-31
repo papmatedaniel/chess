@@ -1,0 +1,25 @@
+manuális tesztek futtatása:
+x1,y1,x2,y2 = jatek1.input_beker("b2 b3")
+print(jatek1.tabla[y1][x1].lepes_ellenorzo((x1,y1), (x2, y2)))
+
+x1,y1,x2,y2 = jatek1.input_beker("b3 b4")
+print(jatek1.tabla[y1][x1].lepes_ellenorzo((x1,y1), (x2, y2)))
+
+x1,y1,x2,y2 = jatek1.input_beker("b4 b5")
+print(jatek1.tabla[y1][x1].lepes_ellenorzo((x1,y1), (x2, y2)))
+
+x1,y1,x2,y2 = jatek1.input_beker("b5 b6")
+print(jatek1.tabla[y1][x1].lepes_ellenorzo((x1,y1), (x2, y2)))
+
+jatek1.tablakiirat()
+x1,y1,x2,y2 = jatek1.input_beker("b6 b7")
+print(f"{x1} {y1}")
+print(jatek1.tabla[y1][x1].lepes())
+print(jatek1.tabla[y1][x1].utes())
+
+x1,y1,x2,y2 = jatek1.input_beker("d1 d2")
+print(jatek1.tabla[y1][x1].lepes())
+print(jatek1.tabla[y1][x1].utes())
+
+
+
