@@ -25,7 +25,7 @@ class Szabaly:
             case "Vezér":
                 return self.vezer_lepes_ellenorzo(kezdokordinata, vegkordinata)
             case "Király":
-                return None  
+                return self.kiraly_lepes_ellenorzo(kezdokordinata, vegkordinata)
             case _:
                 return None
 
@@ -237,6 +237,18 @@ class Szabaly:
     def vezer_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> str:
         lephet = self.hova_lephet_sor()
         uthet = self.hova_uthet_sor()
+
+        return self.altalanos_lepes_ellenorzo(
+            kezdokoordinata,
+            vegkoordinata,
+            lephet,
+            uthet,
+            None
+        )
+    
+    def kiraly_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> str:
+        lephet = self.hova_lephet()
+        uthet = self.hova_uthet()
 
         return self.altalanos_lepes_ellenorzo(
             kezdokoordinata,

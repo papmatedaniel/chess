@@ -19,14 +19,14 @@ class Lepestipusok:
 
 class Tabla:
 
-    def __init__(self, *, mezo, gyalog, huszar, futo, bastya, vezer) -> None:
+    def __init__(self, *, mezo, gyalog, huszar, futo, bastya, vezer, kiraly) -> None:
         self.mezo = mezo
         self.gyalog = gyalog
         self.huszar = huszar
         self.futo = futo
         self.bastya = bastya
         self.vezer = vezer
-        #self.kiraly = kiraly
+        self.kiraly = kiraly
 
         self.tabla = []  
         self.lepesek : list[Lepestipusok] = []
@@ -54,7 +54,7 @@ class Tabla:
                     elif x == 3:
                         babu = copy.deepcopy(self.vezer)
                     elif x == 4:
-                        babu = copy.deepcopy(self.gyalog) # kiraly
+                        babu = copy.deepcopy(self.kiraly)
                     else:
                         # Pyright kedvéért, bár ide sosem jut el
                         sor.append(uj_mezo)
@@ -92,7 +92,7 @@ class Tabla:
                     elif x == 3:
                         babu = copy.deepcopy(self.vezer)
                     elif x == 4:
-                        babu = copy.deepcopy(self.gyalog) #kiraly
+                        babu = copy.deepcopy(self.kiraly)
                     else:
                         sor.append(uj_mezo)
                         continue

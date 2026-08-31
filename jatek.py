@@ -55,7 +55,7 @@ class Jatek:
                 break
 
     def jatekmenet(self) -> None:
-        self.nev_beker()
+        # self.nev_beker()
         self.tablaobj.tablageneralas()
         self.lepesek()
 
