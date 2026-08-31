@@ -1,4 +1,4 @@
-from szabaly import Szabaly
+from filok.szabaly import Szabaly
 
 
 class Jatek:

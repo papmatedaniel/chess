@@ -1,4 +1,4 @@
-from babu import Babu
+from filok.babu import Babu
 
 
 class Huszar(Babu):
