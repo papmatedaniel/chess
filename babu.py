@@ -1,21 +1,21 @@
 
 class Babu:
-    """Tartalmazza a bábu tulajdonságait"""
-    def __init__(self, szin, nev, jelenlegi_koordinata, el_e):
+
+    def __init__(self, szin="nincs", nev="nincs", jelenlegi_koordinata=(-1,-1)) -> None:
         self.szin = szin
         self.nev = nev
         self.koordinatak = [jelenlegi_koordinata]
-        self.el_e = el_e
+        self.el_e = True
         self.szinek = {
             "Fehér" : -1,
             "Fekete" : 1
         }
 
-    def hozzad(self, lepesek):
+    def hozzad(self, lepesek) -> list[tuple[int, int]]:
         x1, y1 = self.koordinatak[-1]
         return [(x1+x2, y1+y2) for x2, y2 in lepesek]
 
-    def lepes_hozzad(self, lepesek):
+    def lepes_hozzad(self, lepesek) -> list[list[tuple[int, int]]]:
         x, y = self.koordinatak[-1]
         folista = []
         for x1, y1 in lepesek:
@@ -29,18 +29,18 @@ class Babu:
 
         return folista
 
-    def ortogonalis_lepes(self):
+    def ortogonalis_lepes(self) -> list[list[tuple[int, int]]]:
         """Vizszintes és függőleges"""
         lepesek = [(0,1), (1,0), (-1, 0), (0,-1)]
         return self.lepes_hozzad(lepesek)
 
-    def diagonalis_lepes(self):
+    def diagonalis_lepes(self) -> list[list[tuple[int, int]]]:
         """Átlós"""
         lepesek = [(1,1), (1,-1), (-1, -1), (-1,1)]
         return self.lepes_hozzad(lepesek)
 
-    def lepes(self):
-        pass
+    def lepes(self) -> list:
+        return []
 
     def __getattr__(self, name):
         if name == 'utes':

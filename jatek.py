@@ -1,11 +1,10 @@
 from szabaly import Szabaly
 
 
-
 class Jatek:
     """Felhasználói interface. Ez lép közvetlen kapcsolatba a felhasználóval."""
 
-    def __init__(self, tablaobj, lepestipusok):
+    def __init__(self, tablaobj, lepestipusok) -> None:
         self.nev1 = ""
         self.nev2 = ""
         self.tablaobj = tablaobj
@@ -34,7 +33,7 @@ class Jatek:
 
 
 
-    def lepes(self):
+    def lepesek(self) -> None:
         while True:
             self.tablaobj.tablakiirat()
             try: 
@@ -55,10 +54,10 @@ class Jatek:
                 print("Kilépés")
                 break
 
-    def jatekmenet(self):
+    def jatekmenet(self) -> None:
         self.nev_beker()
         self.tablaobj.tablageneralas()
-        self.lepes()
+        self.lepesek()
 
 
 

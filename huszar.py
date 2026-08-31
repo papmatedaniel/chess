@@ -2,13 +2,12 @@ from babu import Babu
 
 
 class Huszar(Babu):
-    """Tartalmazza a huszér tulajdonságait, metódusait."""
 
-    def __init__(self, szin, nev, jelenlegi_koordinata, el_e):
-        super().__init__(szin, nev, jelenlegi_koordinata, el_e)
+    def __init__(self) -> None:
+        super().__init__(nev="Huszár")
 
 
-    def lepes(self):
+    def lepes(self) -> list[tuple[int, int]]:
         """Hagyományos mozgása a lónak."""
         lepesek = [(1,2), (2,1), (-1, 2), (2, -1), (1, -2), (-2, 1), (-1,-2), (-2,-1)]
         return self.hozzad(lepesek)

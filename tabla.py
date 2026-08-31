@@ -19,18 +19,17 @@ class Lepestipusok:
 
 class Tabla:
 
-
-    def __init__(self, mezo, gyalog, huszar, bastya, futo, vezer):
+    def __init__(self, *, mezo, gyalog, huszar, futo, bastya, vezer) -> None:
         self.mezo = mezo
         self.gyalog = gyalog
         self.huszar = huszar
         self.futo = futo
         self.bastya = bastya
         self.vezer = vezer
-        # self.kiraly = kiraly
+        #self.kiraly = kiraly
 
-        self.tabla = []
-        self.lepesek = []
+        self.tabla = []  
+        self.lepesek : list[Lepestipusok] = []
 
         
     def tablageneralas(self) -> None:
@@ -44,10 +43,48 @@ class Tabla:
                 uj_mezo = copy.deepcopy(self.mezo)
                 uj_mezo.koordinatak[-1] = (x, y)
 
-                # --- FEKETE BÁBUK ---
-                if y == 0:  # Fekete főbábuk sora
+                # --- FEKETE FŐBÁBUK (y == 0) ---
+                if y == 0:
                     if x in (0, 7):
-                        babu = copy.deepcopy(self.bastya) 
+                        babu = copy.deepcopy(self.bastya)
+                    elif x in (1, 6):
+                        babu = copy.deepcopy(self.huszar)
+                    elif x in (2, 5):
+                        babu = copy.deepcopy(self.futo)
+                    elif x == 3:
+                        babu = copy.deepcopy(self.vezer)
+                    elif x == 4:
+                        babu = copy.deepcopy(self.gyalog) # kiraly
+                    else:
+                        # Pyright kedvéért, bár ide sosem jut el
+                        sor.append(uj_mezo)
+                        continue
+
+                    babu.szin = "Fekete"
+                    babu.koordinatak[-1] = (x, y)
+                    sor.append(babu)
+                    continue
+
+                # --- FEKETE GYALOGOK (y == 1) ---
+                if y == 1:
+                    babu = copy.deepcopy(self.gyalog)
+                    babu.szin = "Fekete"
+                    babu.koordinatak[-1] = (x, y)
+                    sor.append(babu)
+                    continue
+
+                # --- FEHÉR GYALOGOK (y == 6) ---
+                if y == 6:
+                    babu = copy.deepcopy(self.gyalog)
+                    babu.szin = "Fehér"
+                    babu.koordinatak[-1] = (x, y)
+                    sor.append(babu)
+                    continue
+
+                # --- FEHÉR FŐBÁBUK (y == 7) ---
+                if y == 7:
+                    if x in (0, 7):
+                        babu = copy.deepcopy(self.bastya)
                     elif x in (1, 6):
                         babu = copy.deepcopy(self.huszar)
                     elif x in (2, 5):
@@ -56,44 +93,11 @@ class Tabla:
                         babu = copy.deepcopy(self.vezer)
                     elif x == 4:
                         babu = copy.deepcopy(self.gyalog) #kiraly
-
-                    babu.szin = "Fekete"
-                    babu.el_e = True
-                    babu.koordinatak[-1] = (x, y)
-                    sor.append(babu)
-                    continue
-
-                if y == 1:  # Fekete gyalogok sora
-                    babu = copy.deepcopy(self.gyalog)
-                    babu.szin = "Fekete"
-                    babu.el_e = True
-                    babu.koordinatak[-1] = (x, y)
-                    sor.append(babu)
-                    continue
-
-                # --- FEHÉR BÁBUK ---
-                if y == 6:  # Fehér gyalogok sora
-                    babu = copy.deepcopy(self.gyalog)
-                    babu.szin = "Fehér"
-                    babu.el_e = True
-                    babu.koordinatak[-1] = (x, y)
-                    sor.append(babu)
-                    continue
-
-                if y == 7:  # Fehér főbábuk sora
-                    if x in (0, 7):
-                        babu = copy.deepcopy(self.bastya)
-                    elif x in (1, 6):
-                        babu = copy.deepcopy(self.huszar)
-                    elif x in (2, 5):
-                        babu = copy.deepcopy(self.futo) 
-                    elif x == 3:
-                        babu = copy.deepcopy(self.vezer)
-                    elif x == 4:
-                        babu = copy.deepcopy(self.gyalog) #kiraly
+                    else:
+                        sor.append(uj_mezo)
+                        continue
 
                     babu.szin = "Fehér"
-                    babu.el_e = True
                     babu.koordinatak[-1] = (x, y)
                     sor.append(babu)
                     continue
@@ -131,8 +135,7 @@ class Tabla:
 
 
 
-    def lepes_mentes(self, adat_objektum):
-        """Lepesmentes"""
+    def lepes_mentes(self, adat_objektum) -> None:
         self.lepesek.append(adat_objektum)
 
 
