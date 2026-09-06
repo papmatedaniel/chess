@@ -1,21 +1,8 @@
 import copy
-from dataclasses import dataclass
+from typing import Any, TypeGuard
 
+from filok.lepestipusok import Lepestipusok
 
-@dataclass
-class Lepestipusok:
-    muvelet : str
-    honnan1 : tuple[int, int] | None = None
-    hova1 : tuple[int, int] | None = None
-    babutipus1 : str | None = None
-    babuszin : str | None = None
-    levett_babutipus : str | None = None
-    levett_babukoordinataja : tuple[int, int] | None = None
-    atvaltozott_babu_tipusa : str | None = None
-    sanctipus : str | None = None
-    babutipus2 : str | None = None
-    honnan2 : tuple[int, int] | None = None
-    hova2 : tuple[int, int] | None = None
 
 class Tabla:
 
@@ -28,10 +15,9 @@ class Tabla:
         self.vezer = vezer
         self.kiraly = kiraly
 
-        self.tabla = []  
-        self.lepesek : list[Lepestipusok] = []
+        self.tabla: list[list[Any]] = []
+        self.lepesek: list[Lepestipusok] = []
 
-        
     def tablageneralas(self) -> None:
         """Teljes sakk kezdőállás legenerálása."""
 
@@ -107,69 +93,77 @@ class Tabla:
 
             self.tabla.append(sor)
 
-        
+    def valid(self, adat: tuple[int, int] | None) -> TypeGuard[tuple[int, int]]:
+        return adat is not None
 
+    def tablamodosit(self) -> None:
 
+        utolso = self.lepesek[-1]
+        honnan1 = utolso.honnan1
+        hova1 = utolso.hova1
+        levett_babu_koord = utolso.levett_babukoordinataja
+        honnan2 = utolso.honnan2
+        hova2 = utolso.hova2
 
-    def tablamodosit(self, honnan, hova,  muvelet, levettbabukoordinataja=(0,0)) -> None:
-        """Művelet alatt ütés, csere, uj babu értendő"""
-        x1,y1 = honnan
-        x2,y2 = hova
-        if muvelet == "csere":
-            self.tabla[y1][x1], self.tabla[y2][x2] = self.tabla[y2][x2], self.tabla[y1][x1]
+        if self.valid(levett_babu_koord):
+            levx, levy = levett_babu_koord
+            self.tabla[levy][levx] = self.mezo
+            self.tabla[levy][levx].koordinatak.append((levx, levy))
+
+        if self.valid(honnan1) and self.valid(hova1):
+            x1, y1 = honnan1
+            x2, y2 = hova1
+            self.tabla[y1][x1], self.tabla[y2][x2] = (
+                self.tabla[y2][x2],
+                self.tabla[y1][x1],
+            )
             self.tabla[y1][x1].koordinatak.append((x1, y1))
             self.tabla[y2][x2].koordinatak.append((x2, y2))
 
-        if muvelet == "utes":
-            self.tabla[y2][x2] = self.tabla[y1][x1]
-            self.tabla[y2][x2].koordinatak.append((x2, y2))
-            self.tabla[y1][x1] = self.mezo
-            self.tabla[y1][x1].koordinatak.append((x1, x2))
-
-        if muvelet == "enpassant":
-            self.tabla[y1][x1], self.tabla[y2][x2] = self.tabla[y2][x2], self.tabla[y1][x1]
+        if self.valid(honnan2) and self.valid(hova2):
+            x1, y1 = honnan2
+            x2, y2 = hova2
+            self.tabla[y1][x1], self.tabla[y2][x2] = (
+                self.tabla[y2][x2],
+                self.tabla[y1][x1],
+            )
             self.tabla[y1][x1].koordinatak.append((x1, y1))
             self.tabla[y2][x2].koordinatak.append((x2, y2))
-            x3, y3 = levettbabukoordinataja
-            self.tabla[y3][x3] = self.mezo
-
-
 
     def lepes_mentes(self, adat_objektum) -> None:
         self.lepesek.append(adat_objektum)
 
-
-    def bentvane(self, koordinata) -> bool: 
+    def bentvane(self, koordinata) -> bool:
         x, y = koordinata
         return 0 <= x <= 7 and 0 <= y <= 7
 
     def urese(self, koordinata) -> bool:
-        x,y = koordinata
+        x, y = koordinata
         return self.tabla[y][x].nev == "nincs"
 
     def tablakiirat(self) -> None:
         # Unicode sakkfigurák (mindegyik pontosan 1 karakter széles)
         szotar = {
-            "Gyalog":  {"Fehér": "♙", "Fekete": "♟"},
-            "Bástya":  {"Fehér": "♖", "Fekete": "♜"},
-            "Huszár":  {"Fehér": "♘", "Fekete": "♞"},
-            "Futó":    {"Fehér": "♗", "Fekete": "♝"},
-            "Vezér":   {"Fehér": "♕", "Fekete": "♛"},
-            "Király":  {"Fehér": "♔", "Fekete": "♚"},
-            "nincs":   {"Fehér": " ", "Fekete": " "}
+            "Gyalog": {"Fehér": "♙", "Fekete": "♟"},
+            "Bástya": {"Fehér": "♖", "Fekete": "♜"},
+            "Huszár": {"Fehér": "♘", "Fekete": "♞"},
+            "Futó": {"Fehér": "♗", "Fekete": "♝"},
+            "Vezér": {"Fehér": "♕", "Fekete": "♛"},
+            "Király": {"Fehér": "♔", "Fekete": "♚"},
+            "nincs": {"Fehér": " ", "Fekete": " "},
         }
-        
+
         # ANSI színkódok a terminálhoz
         FEKETE_SZIN = "\033[93m"  # Élénksárga/Arany a sötét bábuknak, hogy jól látszódjanak a fekete háttéren
-        ALAP_SZIN = "\033[0m"     # Színezés alaphelyzetbe állítása
-        
+        ALAP_SZIN = "\033[0m"  # Színezés alaphelyzetbe állítása
+
         elvalaszto = "  +" + "---+" * 8
         print(elvalaszto)
-        
+
         for idx, j in enumerate(self.tabla):
             sor_szam = len(self.tabla) - idx
             sor_szoveg = f"{sor_szam} |"
-            
+
             for i in j:
                 if i.nev == "nincs":
                     sor_szoveg += "   |"
@@ -180,8 +174,8 @@ class Tabla:
                         sor_szoveg += f" {FEKETE_SZIN}{babu}{ALAP_SZIN} |"
                     else:
                         sor_szoveg += f" {babu} |"
-                        
+
             print(sor_szoveg)
             print(elvalaszto)
-            
+
         print("    A   B   C   D   E   F   G   H  ")

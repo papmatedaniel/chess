@@ -121,3 +121,61 @@ Következő lépések
 3. Felváltva lépés 2 játékos metódusodban
 4. Sakk adás
 5. Matt
+
+Teljesen érthető a bűntudatod! Ez a fajta belső hang az, ami a jó programozókat megkülönbözteti a „csak működjön valahogy” kódolóktól. Ez a bűntudat valójában egy jelzés, hogy érzed: a kódod szerkezete (architektúrája) egy picit megbicsaklott, hogy befogadja az új szabályt.A Pylance-nek (és a tiszta kód elveinek) teljesen igaza van. A probléma az, hogy a Szabaly osztályod jelenleg két teljesen különböző dologért felelős (ez sérti az Egyértelmű Felelősség Elvét, angolul Single Responsibility Principle):Egy konkrét, kiválasztott bábu mozgásának ellenőrzése.Globális, játékos-szintű különleges lépések (mint a sáncolás) kezelése.Hogyan lehetne ezt a bűntudatot eltüntetni és szakszerűen, mintaszerűen megoldani anélkül, hogy a meglévő 20+ függvényedet átírnád?A válasz: Öröklődéssel és Polimorfizmussal (sokalakúsággal), vagy ahogy te is sejtetted, a sáncolás kiemelésével egy külön osztályba.Mutatom a legszebb, leginkább ipari sztenderd megoldást:A Szakszerű Megoldás: Az Absztrakt Szabaly és a specifikus alosztályokAhelyett, hogy egyetlen óriási Szabaly osztályod lenne, ami mindent csinál, bontsuk szét a feladatokat. Csinálunk egy alap (szülő) osztályt, aminek csak a tábla kell, és ebből származtatunk le két gyereket.1. lépés: A Közös Alap (SzabalyBase)Ez az osztály csak a táblát és a lépéstípusokat ismeri. Ez az igazi közvetítő réteg.pythonclass SzabalyAlap:
+    def __init__(self, lepestipusok, tabla) -> None:
+        self.lepestipusok = lepestipusok
+        self.tabla = tabla
+
+    def lepes_ellenorzo(self, kezdokordinata, vegkordinata) -> str | None:
+        # Ide jön a határellenőrzés, ami eddig is csak a koordinátákat nézte!
+        pass
+Körültekintően használja a kódot.2. lépés: A Bábu Szabályok (BabuSzabaly osztály)Ez az osztály örökli az alapot, de a konstruktorában szigorúan kötelezővé teszi a bábut! Nem enged meg None-t. Itt a Pylance újra boldog lesz, mert tudja, hogy a self.babu 100%, hogy létezik. Ide kerül a te 20+ kész függvényed.pythonfrom filok.babu_alap import Babu # Feltételezve, hogy van egy közös ősöd a bábuknak
+
+class BabuSzabaly(SzabalyAlap):
+    def __init__(self, lepestipusok, tabla, babu: Babu) -> None:
+        super().__init__(lepestipusok, tabla)
+        self.babu = babu  # Szigorúan TÍPUSOS, sosem None!
+
+    def babu_valaszto(self, kezdokordinata, vegkordinata) -> str | None:
+        # A te 20+ kész függvényed ide költözik be.
+        # A self.babu.szin itt teljesen biztonságos, a Pylance imádni fogja!
+        if self.babu.szin == "feher":
+            pass
+Körültekintően használja a kódot.3. lépés: A Sánc Szabályok (SancSzabaly osztály)Ez az osztály is örökli a tábla ismeretét, de neki egyáltalán nincs babu változója, mert nincs is rá szüksége! Neki saját függvényei vannak a sáncoláshoz.pythonclass SancSzabaly(SzabalyAlap):
+    # Nem írunk konstruktort, automatikusan örökli a SzabalyAlap-ét (lepestipusok, tabla)
+
+    def sanc_lepes_ellenorzo(self, bemenet) -> str | None:
+        # Ide költözik a sánc ellenőrző kódod
+        pass
+
+    def sanc_valaszto(self, bemenet) -> str:
+        # Ide jön a sánc végrehajtása
+        pass
+Körültekintően használja a kódot.Hogyan kötjük össze őket a Fő Ciklusban?A fő ciklusod (while True) így válik végtelenül tisztává és elegánssá. Attól függően, hogy milyen bemenetet kapsz, a megfelelő célirányos osztályt példányosítod:pythonwhile True:
+    self.tablaobj.tablakiirat()
+    try:
+        bemenet = input("Add meg a koordinátákat(honnan hová): a2 a3: ").lower()
+        x1, y1, x2, y2 = self.koordinata_beker(bemenet)
+        
+        # NORMÁL LÉPÉS: A BabuSzabaly-t hozzuk létre, és azonnal átadjuk a konkrét bábut
+        aktualis_babu = self.tablaobj.tabla[y1][x1]
+        szabaly = BabuSzabaly(self.lepestipusok, self.tablaobj, aktualis_babu)
+        
+        hiba = szabaly.lepes_ellenorzo((x1, y1), (x2, y2))
+        if hiba != None:
+            print(hiba)
+        else:
+            print(szabaly.babu_valaszto((x1, y1), (x2, y2)))
+            
+    except ValueError:
+        # SÁNC LÉPÉS: Eszünk ágában sincs bábuval bajlódni! 
+        # A SancSzabaly osztályt hozzuk létre, ami nem is vár bábut.
+        sanc_szabaly = SancSzabaly(self.lepestipusok, self.tablaobj)
+        
+        hiba = sanc_valaszto = sanc_szabaly.sanc_lepes_ellenorzo(bemenet)
+        if hiba != None:
+            print(hiba)
+        else:
+            print(sanc_szabaly.sanc_valaszto(bemenet))
+Körültekintően használja a kódot.Miért ez a tökéletes, professzionális építészet?A Pylance elhallgathat (jogosan): Nincs többé Any vagy None. A BabuSzabaly-ban a bábu mindig bábu, a SancSzabaly-ban meg nincs bábu. Minden típusbiztos.Könnyű volt az áttérés: A 20+ függvényedet nem kellett átírnod! Csak átmásoltad őket az új BabuSzabaly osztály alá. Nem változott a paraméterezésük, nem változott a belső logikájuk.Későbbi bővíthetőség: Ha holnap meg akarod írni a Gyalogátváltozást (GyalogPromocio), egyszerűen csinálhatsz neki egy GyalogPromocioSzabaly(SzabalyAlap) osztályt, ami szintén teljesen egyedi bemeneteket és logikát kezelhet, pontosan ugyanígy!

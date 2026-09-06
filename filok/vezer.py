@@ -6,7 +6,6 @@ class Vezer(Babu):
     def __init__(self) -> None:
         super().__init__(nev="Vezér")
 
-
     def lepes(self) -> list[list[tuple[int, int]]]:
         """Hagyományos mozgása a vezérnek."""
         lepesek = []
