@@ -34,6 +34,7 @@ class Jatek:
 
     def lepesek(self) -> None:
         szinek = ["Fehér", "Fekete"]
+
         while True:
             print(szinek[0])
             try:
@@ -41,40 +42,43 @@ class Jatek:
                 bemenet = input("Add meg a koordinátákat(honnan hová): a2 a3: ").lower()
 
                 try:
-                    # Megpróbáljuk normál lépésként feldolgozni
                     x1, y1, x2, y2 = self.koordinata_beker(bemenet)
+
                     szabaly = BabuSzabaly(
                         self.tablaobj,
                         self.lepestipusok,
                         szinek[0],
                         self.tablaobj.tabla[y1][x1],
                     )
-                    eredmeny = szabaly.lepes_ellenorzo((x1, y1), (x2, y2))
-                    print(eredmeny.uzenet)
-                    if eredmeny.siker:
-                        print(szabaly.babu_valaszto((x1, y1), (x2, y2)).uzenet)
+
+                    ellenorzes = szabaly.lepes_ellenorzo((x1, y1), (x2, y2))
+                    print(ellenorzes.uzenet)
+
+                    if not ellenorzes.siker:
+                        continue
+
+                    vegrehajtas = szabaly.babu_valaszto((x1, y1), (x2, y2))
+                    print(vegrehajtas.uzenet)
+
+                    if vegrehajtas.siker:
                         szinek = szinek[::-1]
 
-                except ValueError:
+                except ValueError | IndexError | KeyError:
                     try:
                         szabaly2 = SancSzabaly(
                             self.tablaobj, self.lepestipusok, bemenet, szinek[0]
                         )
                         eredmeny2 = szabaly2.sanc_valaszto()
                         print(eredmeny2.uzenet)
+
                         if eredmeny2.siker:
                             szinek = szinek[::-1]
 
-                    except (
-                        KeyError,
-                        ValueError,
-                        IndexError,
-                    ):  # Csak a sima hibákat kapja el, a kilépést NEM!
+                    except KeyError | ValueError | IndexError:
                         print("Hibás input")
-                        szinek = szinek[::-1]
+                        continue
 
             except KeyboardInterrupt:
-                # Ez most már biztosan elkapja a Ctrl+C-t vagy a leállítást
                 print("\nKilépés")
                 break
 

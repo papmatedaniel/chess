@@ -136,8 +136,27 @@ class BabuSzabaly(Szabaly):
 
         return self.hova_lephet()
 
+    def gyalog_atvaltozhat_e(self):
+        return self.babu.utolsokoord[1] in [1, 6] and len(self.babu.koordinatak) > 1
+
+    def gyalog_atvaltozas(self) -> str:
+        szotar = {"v": "Vezér", "b": "Bástya", "h": "Huszár", "f": "Futó"}
+        while True:
+            bemenet = input("Milyen bábuvá változnál?(V, B, H, F): ").lower()
+            if bemenet in ["v", "b", "h", "f"]:
+                break
+            else:
+                print("probald ujra")
+        return szotar[bemenet]
+
     def altalanos_lepes_ellenorzo(
-        self, kezdokoordinata, vegkoordinata, lephet, uthet, enpassant=None
+        self,
+        kezdokoordinata,
+        vegkoordinata,
+        lephet,
+        uthet,
+        enpassant=None,
+        atvaltozott_babu_tipusa=None,
     ) -> LepesEredmeny:
         x, y = vegkoordinata
         if vegkoordinata in lephet:
@@ -148,6 +167,7 @@ class BabuSzabaly(Szabaly):
                     hova1=vegkoordinata,
                     babutipus1=self.babu.nev,
                     babuszin=self.babu.szin,
+                    atvaltozott_babu_tipusa=atvaltozott_babu_tipusa,
                 )
             )
             self.tabla.tablamodosit()
@@ -162,6 +182,8 @@ class BabuSzabaly(Szabaly):
                     babutipus1=self.babu.nev,
                     babuszin=self.babu.szin,
                     levett_babutipus=self.tabla.tabla[y][x].nev,
+                    levett_babukoordinataja=vegkoordinata,
+                    atvaltozott_babu_tipusa=atvaltozott_babu_tipusa,
                 )
             )
             self.tabla.tablamodosit()
@@ -190,9 +212,17 @@ class BabuSzabaly(Szabaly):
         lephet = self.gyalog_hova_lephet()
         uthet = self.hova_uthet()
         enpassant = self.gyalog_hova_lephet_enpassant()
+        atvaltozott_babu_tipusa = None
+        if self.gyalog_atvaltozhat_e():
+            atvaltozott_babu_tipusa = self.gyalog_atvaltozas()
 
         return self.altalanos_lepes_ellenorzo(
-            kezdokoordinata, vegkoordinata, lephet, uthet, enpassant
+            kezdokoordinata,
+            vegkoordinata,
+            lephet,
+            uthet,
+            enpassant,
+            atvaltozott_babu_tipusa,
         )
 
     def huszar_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:

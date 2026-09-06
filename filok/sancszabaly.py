@@ -30,7 +30,7 @@ class SancSzabaly:
         kiraly = egeszsor[Sanc.kiraly_honnan]
         bastya = egeszsor[Sanc.sancvalaszto[self.sanc]["bastya_honnan"]]
         if kiraly.nev != "Király" or bastya.nev != "Bástya":
-            return LepesEredmeny(False, "Hiámyzó bábu")
+            return LepesEredmeny(False, "Hiányzó bábu")
 
         if len(kiraly.koordinatak) != 1 or len(bastya.koordinatak) != 1:
             return LepesEredmeny(False, "Korábbi lépés miatt nem sáncolhatsz")
@@ -58,7 +58,7 @@ class SancSzabaly:
 
         self.tabla.lepes_mentes(
             self.lepestipusok(
-                muvelet="sánc",
+                muvelet="sanc",
                 honnan1=kiraly_honnan,
                 hova1=kiraly_hova,
                 babutipus1=Sanc.babu1,

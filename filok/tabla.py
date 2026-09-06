@@ -96,39 +96,95 @@ class Tabla:
     def valid(self, adat: tuple[int, int] | None) -> TypeGuard[tuple[int, int]]:
         return adat is not None
 
+    def _uresit_mezo(self, x: int, y: int) -> None:
+        """Segédfüggvény egy mező kiürítésére."""
+        uj_ures = self.mezo() if callable(self.mezo) else self.mezo
+        self.tabla[y][x] = uj_ures
+        if hasattr(self.tabla[y][x], "koordinatak"):
+            self.tabla[y][x].koordinatak = [(x, y)]
+
+    def _mozgat_babu(self, honnan: tuple[int, int], hova: tuple[int, int]) -> None:
+        """Segédfüggvény egy figura áthelyezésére és a régi hely kiürítésére."""
+        x1, y1 = honnan
+        x2, y2 = hova
+
+        # Áttesszük a figurát a célmezőre
+        self.tabla[y2][x2] = self.tabla[y1][x1]
+        if hasattr(self.tabla[y2][x2], "koordinatak"):
+            self.tabla[y2][x2].koordinatak.append((x2, y2))
+
+        # A startmezőt kiürítjük
+        self._uresit_mezo(x1, y1)
+
     def tablamodosit(self) -> None:
+        if not self.lepesek:
+            return
 
         utolso = self.lepesek[-1]
+        muvelet = utolso.muvelet
+
         honnan1 = utolso.honnan1
         hova1 = utolso.hova1
         levett_babu_koord = utolso.levett_babukoordinataja
         honnan2 = utolso.honnan2
         hova2 = utolso.hova2
+        atvaltozott_babu_tipusa = utolso.atvaltozott_babu_tipusa
+        babuszin = utolso.babuszin
+        uj_babu: Any | None = None
+        match muvelet:
 
-        if self.valid(levett_babu_koord):
-            levx, levy = levett_babu_koord
-            self.tabla[levy][levx] = self.mezo
-            self.tabla[levy][levx].koordinatak.append((levx, levy))
+            case "lepes" | "utes":
+                if self.valid(honnan1) and self.valid(hova1):
+                    self._mozgat_babu(honnan1, hova1)
 
-        if self.valid(honnan1) and self.valid(hova1):
-            x1, y1 = honnan1
-            x2, y2 = hova1
-            self.tabla[y1][x1], self.tabla[y2][x2] = (
-                self.tabla[y2][x2],
-                self.tabla[y1][x1],
-            )
-            self.tabla[y1][x1].koordinatak.append((x1, y1))
-            self.tabla[y2][x2].koordinatak.append((x2, y2))
+            case "enpassant":
+                if (
+                    self.valid(honnan1)
+                    and self.valid(hova1)
+                    and self.valid(levett_babu_koord)
+                ):
+                    self._uresit_mezo(*levett_babu_koord)
+                    self._mozgat_babu(honnan1, hova1)
 
-        if self.valid(honnan2) and self.valid(hova2):
-            x1, y1 = honnan2
-            x2, y2 = hova2
-            self.tabla[y1][x1], self.tabla[y2][x2] = (
-                self.tabla[y2][x2],
-                self.tabla[y1][x1],
-            )
-            self.tabla[y1][x1].koordinatak.append((x1, y1))
-            self.tabla[y2][x2].koordinatak.append((x2, y2))
+            case "sanc":
+                if (
+                    self.valid(honnan1)
+                    and self.valid(hova1)
+                    and self.valid(honnan2)
+                    and self.valid(hova2)
+                ):
+                    self._mozgat_babu(honnan1, hova1)
+                    self._mozgat_babu(honnan2, hova2)
+
+            case _:
+                print(f"Ismeretlen művelet: {muvelet}")
+
+        # -------------------------
+        # Gyalog átváltozás (javított)
+        # -------------------------
+        if atvaltozott_babu_tipusa is not None and self.valid(hova1):
+            x, y = hova1
+
+            # Ugyanaz a minta, mint a kezdőtáblánál: deepcopy prototípus báburól
+            if atvaltozott_babu_tipusa == "Vezér":
+                uj_babu = copy.deepcopy(self.vezer)
+            elif atvaltozott_babu_tipusa == "Bástya":
+                uj_babu = copy.deepcopy(self.bastya)
+            elif atvaltozott_babu_tipusa == "Huszár":
+                uj_babu = copy.deepcopy(self.huszar)
+            elif atvaltozott_babu_tipusa == "Futó":
+                uj_babu = copy.deepcopy(self.futo)
+
+            if uj_babu is None:
+                raise ValueError(
+                    f"Ismeretlen átváltozási bábutípus: {atvaltozott_babu_tipusa}"
+                )
+
+            uj_babu.szin = babuszin
+            uj_babu.koordinatak = [(x, y)]
+
+            # A gyalog helyére kerül az új bábu
+            self.tabla[y][x] = uj_babu
 
     def lepes_mentes(self, adat_objektum) -> None:
         self.lepesek.append(adat_objektum)
