@@ -21,4 +21,4 @@ class Sanc:
         },
     }
 
-    szinek: ClassVar[dict] = {"fehér": 7, "fekete": 0}
+    szinek: ClassVar[dict] = {"Fehér": 7, "Fekete": 0}

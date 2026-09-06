@@ -1,4 +1,3 @@
-
 from filok.lepeseredmeny import LepesEredmeny
 from filok.sanc import Sanc
 
@@ -45,7 +44,6 @@ class SancSzabaly:
 
     def sanc_valaszto(self) -> LepesEredmeny:
         eredmeny = self.sanc_lephet_e()
-        print(eredmeny.uzenet)
 
         if not eredmeny.siker:
             return eredmeny
