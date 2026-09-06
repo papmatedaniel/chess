@@ -33,7 +33,7 @@ class Jatek:
         return [szoveg.index(x1), 8 - int(y1), szoveg.index(x2), 8 - int(y2)]
 
     def lepesek(self) -> None:
-        szinek = ["fehér", "fekete"]
+        szinek = ["Fehér", "Fekete"]
         while True:
             print(szinek[0])
             try:
@@ -44,12 +44,15 @@ class Jatek:
                     # Megpróbáljuk normál lépésként feldolgozni
                     x1, y1, x2, y2 = self.koordinata_beker(bemenet)
                     szabaly = BabuSzabaly(
-                        self.tablaobj, self.lepestipusok, self.tablaobj.tabla[y1][x1]
+                        self.tablaobj,
+                        self.lepestipusok,
+                        szinek[0],
+                        self.tablaobj.tabla[y1][x1],
                     )
                     eredmeny = szabaly.lepes_ellenorzo((x1, y1), (x2, y2))
                     print(eredmeny.uzenet)
                     if eredmeny.siker:
-                        print(szabaly.babu_valaszto((x1, y1), (x2, y2)))
+                        print(szabaly.babu_valaszto((x1, y1), (x2, y2)).uzenet)
                         szinek = szinek[::-1]
 
                 except ValueError:

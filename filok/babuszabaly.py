@@ -3,11 +3,11 @@ from filok.szabaly import Szabaly
 
 
 class BabuSzabaly(Szabaly):
-    def __init__(self, tabla, lepestipusok, babu) -> None:
-        super().__init__(tabla, lepestipusok)
+    def __init__(self, tabla, lepestipusok, sajatszin, babu) -> None:
+        super().__init__(tabla, lepestipusok, sajatszin)
         self.babu = babu
 
-    def babu_valaszto(self, kezdokordinata, vegkordinata) -> LepesEredmeny | None:
+    def babu_valaszto(self, kezdokordinata, vegkordinata) -> LepesEredmeny:
 
         match self.babu.nev:
             case "Gyalog":
@@ -26,7 +26,7 @@ class BabuSzabaly(Szabaly):
             case "Király":
                 return self.kiraly_lepes_ellenorzo(kezdokordinata, vegkordinata)
             case _:
-                return None
+                return LepesEredmeny(False, "Nincs ilyen bábu")
 
     def hova_lephet(self) -> list[tuple[int, int]]:
         jo_koordinatak = []
@@ -130,9 +130,7 @@ class BabuSzabaly(Szabaly):
 
     def gyalog_hova_lephet(self) -> list[tuple[int, int]]:
         # Ha előre 1 lépés engedélyezett, 2-t próbálunk
-        if (
-            len(self.babu.koordinatak) == 1 and len(self.hova_lephet()) == 1
-        ):
+        if len(self.babu.koordinatak) == 1 and len(self.hova_lephet()) == 1:
             if self.babu.utolsokoord[-1] in [1, 6]:  # második soros gyalogok
                 return self.babu.elso_lepes()
 
