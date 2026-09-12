@@ -28,3 +28,5 @@ tabla = Tabla(
 lepestipus = Lepestipusok
 jatek = Jatek(tabla, lepestipus)
 jatek.jatekmenet()
+
+# ctrl shift  b elinditja a terminalt

@@ -1,6 +1,9 @@
 from filok.babuszabaly import BabuSzabaly
 from filok.sancszabaly import SancSzabaly
-
+from filok.babu import Babu
+from filok.gyalog_lepes import Gyaloglepes
+from filok.alltalanosszabalyok import Altalanosszabalyok
+from filok.kiraly_sakkezeles import Sakkkezeles
 
 class Jatek:
     """Felhasználói interface. Ez lép közvetlen kapcsolatba a felhasználóval."""
@@ -49,6 +52,12 @@ class Jatek:
                         self.lepestipusok,
                         szinek[0],
                         self.tablaobj.tabla[y1][x1],
+                        Babu(),
+                        Altalanosszabalyok(self.tablaobj),
+                        Gyaloglepes(self.tablaobj,
+                                    self.tablaobj.tabla[y1][x1],
+                                    Altalanosszabalyok(self.tablaobj)
+                                    )
                     )
 
                     ellenorzes = szabaly.lepes_ellenorzo((x1, y1), (x2, y2))
@@ -62,8 +71,9 @@ class Jatek:
 
                     if vegrehajtas.siker:
                         szinek = szinek[::-1]
+                        print(Sakkkezeles(self.tablaobj, Altalanosszabalyok(self.tablaobj)).kiralyvegrehajt("Fehér"))
 
-                except ValueError | IndexError | KeyError:
+                except (ValueError, IndexError , KeyError):
                     try:
                         szabaly2 = SancSzabaly(
                             self.tablaobj, self.lepestipusok, bemenet, szinek[0]
@@ -74,7 +84,7 @@ class Jatek:
                         if eredmeny2.siker:
                             szinek = szinek[::-1]
 
-                    except KeyError | ValueError | IndexError:
+                    except (KeyError , ValueError, IndexError):
                         print("Hibás input")
                         continue
 

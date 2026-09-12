@@ -1,11 +1,42 @@
 from filok.lepeseredmeny import LepesEredmeny
-from filok.szabaly import Szabaly
 
 
-class BabuSzabaly(Szabaly):
-    def __init__(self, tabla, lepestipusok, sajatszin, babu) -> None:
-        super().__init__(tabla, lepestipusok, sajatszin)
+class BabuSzabaly:
+    def __init__(
+        self,
+        tabla,
+        lepestipusok,
+        sajatszin,
+        babu,
+        babu_oslepesek,
+        altalanosszabalyok,
+        gyalog,
+    ) -> None:
         self.babu = babu
+        self.babu_oslepesek = babu_oslepesek
+        self.lepestipusok = lepestipusok
+        self.tabla = tabla
+        self.sajatszin = sajatszin
+        self.altalanosszabalyok = altalanosszabalyok
+        self.gyalog = gyalog
+
+    def lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:
+        if self.tabla.urese(kezdokoordinata):
+            return LepesEredmeny(False, "A kezdő koordinátán nincs bábu")
+        if not self.tabla.bentvane(kezdokoordinata):
+            return LepesEredmeny(False, "A kezdő koordináta a pályán kívül van")
+
+        if not self.tabla.bentvane(vegkoordinata):
+            return LepesEredmeny(False, "A célkoordináta a pályán kívül van")
+
+        x, y = kezdokoordinata
+        if (
+            not self.tabla.urese(kezdokoordinata)
+            and self.sajatszin != self.tabla.tabla[y][x].szin
+        ):
+            return LepesEredmeny(False, "Az ellenfél bábujához nyúltál")
+
+        return LepesEredmeny(True, "Minden feltétel megfelel")
 
     def babu_valaszto(self, kezdokordinata, vegkordinata) -> LepesEredmeny:
 
@@ -27,127 +58,6 @@ class BabuSzabaly(Szabaly):
                 return self.kiraly_lepes_ellenorzo(kezdokordinata, vegkordinata)
             case _:
                 return LepesEredmeny(False, "Nincs ilyen bábu")
-
-    def hova_lephet(self) -> list[tuple[int, int]]:
-        jo_koordinatak = []
-
-        for i in self.babu.lepes():
-            if self.tabla.bentvane(i) and self.tabla.urese(i):
-                jo_koordinatak.append(i)
-
-        return jo_koordinatak
-
-    def hova_uthet(self) -> list[tuple[int, int]]:
-        jo_koordinatak = []
-
-        for i in self.babu.utes():
-            if (
-                self.tabla.bentvane(i)
-                and not self.tabla.urese(i)
-                and self.tabla.tabla[i[1]][i[0]].szin != self.babu.szin
-            ):
-                jo_koordinatak.append(i)
-
-        return jo_koordinatak
-
-    def hova_lephet_sor(self) -> list[tuple[int, int]]:
-        """Egyenes lépssorozat, bástya, futó, vezér"""
-        jo_koordinatak = []
-
-        for i in self.babu.lepes():
-            for j in i:
-                if self.tabla.bentvane(j) and self.tabla.urese(j):
-                    jo_koordinatak.append(j)
-                else:
-                    break
-
-        return jo_koordinatak
-
-    def hova_uthet_sor(self) -> list[tuple[int, int]]:
-        """egyenes lépssorozat, bástya, futó"""
-        jo_koordinatak = []
-
-        for i in self.babu.utes():
-            for j in i:
-                if (
-                    self.tabla.bentvane(j)
-                    and not self.tabla.urese(j)
-                    and self.tabla.tabla[j[1]][j[0]].szin != self.babu.szin
-                ):
-                    jo_koordinatak.append(j)
-                    break
-                if (
-                    not self.tabla.bentvane(j)
-                    or self.tabla.tabla[j[1]][j[0]].szin == self.babu.szin
-                ):
-                    break
-
-        return jo_koordinatak
-
-    def gyalog_duplalepese(self, koordinatak) -> bool:
-        if len(koordinatak) == 2:
-            x1, y1 = koordinatak[0]
-            x2, y2 = koordinatak[1]
-            return x1 == x2 and abs(y2 - y1) == 2
-        return False
-
-    def gyalog_hova_lephet_enpassant(self) -> dict:
-
-        alap_valasz: dict[str, list[tuple[int, int]] | tuple[int, int] | None] = {
-            "vegkoordinata": [],
-            "leveheto_koordinata": None,
-        }
-
-        if self.nemlepett():
-            return alap_valasz
-
-        utolso = self.tabla.lepesek[-1]
-        if utolso.babutipus1 != "Gyalog":
-            return alap_valasz
-
-        x1, y1 = utolso.hova1
-        x2, y2 = self.babu.utolsokoord
-
-        if not self.gyalog_duplalepese(self.tabla.tabla[y1][x1].koordinatak):
-            return alap_valasz
-
-        if y2 != y1 or abs(x2 - x1) != 1:
-            return alap_valasz
-
-        jo_koordinatak = []
-        leveheto_koordinata = None
-
-        for i in self.babu.utes():
-            x = i[0]
-            if self.tabla.bentvane(i) and self.tabla.urese(i) and x == x1:
-                leveheto_koordinata = utolso.hova1
-                jo_koordinatak.append(i)
-
-        return {
-            "vegkoordinata": jo_koordinatak,
-            "leveheto_koordinata": leveheto_koordinata,
-        }
-
-    def gyalog_hova_lephet(self) -> list[tuple[int, int]]:
-        # Ha előre 1 lépés engedélyezett, 2-t próbálunk
-        if len(self.babu.koordinatak) == 1 and len(self.hova_lephet()) == 1:
-            if self.babu.utolsokoord[-1] in [1, 6]:  # második soros gyalogok
-                return self.babu.elso_lepes()
-
-        return self.hova_lephet()
-
-    def gyalog_atvaltozhat_e(self):
-        return self.babu.utolsokoord[1] in [1, 6] and len(self.babu.koordinatak) > 1
-
-    def gyalog_atvaltozas(self) -> str:
-        szotar = {"v": "Vezér", "b": "Bástya", "h": "Huszár", "f": "Futó"}
-        while True:
-            bemenet = input("Milyen bábuvá változnál?(V, B, H, F): ").lower()
-            if bemenet in ["v", "b", "h", "f"]:
-                break
-            else:
-                print("probald ujra")
-        return szotar[bemenet]
 
     def altalanos_lepes_ellenorzo(
         self,
@@ -209,12 +119,12 @@ class BabuSzabaly(Szabaly):
         )
 
     def gyalog_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:
-        lephet = self.gyalog_hova_lephet()
-        uthet = self.hova_uthet()
-        enpassant = self.gyalog_hova_lephet_enpassant()
+        lephet = self.gyalog.gyalog_hova_lephet()
+        uthet = self.altalanosszabalyok.hova_uthet(self.babu.utes(), self.babu.szin)
+        enpassant = self.gyalog.gyalog_hova_lephet_enpassant()
         atvaltozott_babu_tipusa = None
-        if self.gyalog_atvaltozhat_e():
-            atvaltozott_babu_tipusa = self.gyalog_atvaltozas()
+        if self.gyalog.gyalog_atvaltozhat_e():
+            atvaltozott_babu_tipusa = self.gyalog.gyalog_atvaltozas()
 
         return self.altalanos_lepes_ellenorzo(
             kezdokoordinata,
@@ -226,40 +136,40 @@ class BabuSzabaly(Szabaly):
         )
 
     def huszar_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:
-        lephet = self.hova_lephet()
-        uthet = self.hova_uthet()
+        lephet = self.altalanosszabalyok.hova_lephet(self.babu.lepes())
+        uthet = self.altalanosszabalyok.hova_uthet(self.babu.utes(), self.babu.szin)
 
         return self.altalanos_lepes_ellenorzo(
             kezdokoordinata, vegkoordinata, lephet, uthet, None
         )
 
     def bastya_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:
-        lephet = self.hova_lephet_sor()
-        uthet = self.hova_uthet_sor()
+        lephet = self.altalanosszabalyok.hova_lephet_sor(self.babu.lepes())
+        uthet = self.altalanosszabalyok.hova_uthet_sor(self.babu.utes(), self.babu.szin)
 
         return self.altalanos_lepes_ellenorzo(
             kezdokoordinata, vegkoordinata, lephet, uthet, None
         )
 
     def futo_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:
-        lephet = self.hova_lephet_sor()
-        uthet = self.hova_uthet_sor()
+        lephet = self.altalanosszabalyok.hova_lephet_sor(self.babu.lepes())
+        uthet = self.altalanosszabalyok.hova_uthet_sor(self.babu.utes(), self.babu.szin)
 
         return self.altalanos_lepes_ellenorzo(
             kezdokoordinata, vegkoordinata, lephet, uthet, None
         )
 
     def vezer_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:
-        lephet = self.hova_lephet_sor()
-        uthet = self.hova_uthet_sor()
+        lephet = self.altalanosszabalyok.hova_lephet_sor(self.babu.lepes())
+        uthet = self.altalanosszabalyok.hova_uthet_sor(self.babu.utes(), self.babu.szin)
 
         return self.altalanos_lepes_ellenorzo(
             kezdokoordinata, vegkoordinata, lephet, uthet, None
         )
 
     def kiraly_lepes_ellenorzo(self, kezdokoordinata, vegkoordinata) -> LepesEredmeny:
-        lephet = self.hova_lephet()
-        uthet = self.hova_uthet()
+        lephet = self.altalanosszabalyok.hova_lephet(self.babu.lepes())
+        uthet = self.altalanosszabalyok.hova_uthet(self.babu.utes(), self.babu.szin)
 
         return self.altalanos_lepes_ellenorzo(
             kezdokoordinata, vegkoordinata, lephet, uthet, None

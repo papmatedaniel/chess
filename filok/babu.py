@@ -41,6 +41,19 @@ class Babu:
         lepesek = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
         return self.lepes_hozzad(lepesek)
 
+    def huszar_lepes(self):
+        lepesek = [
+            (1, 2),
+            (2, 1),
+            (-1, 2),
+            (2, -1),
+            (1, -2),
+            (-2, 1),
+            (-1, -2),
+            (-2, -1),
+        ]
+        return self.hozzad(lepesek)
+
     def lepes(self) -> list:
         return []
 

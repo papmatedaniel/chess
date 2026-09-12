@@ -40,6 +40,8 @@ class SancSzabaly:
         ):
             return LepesEredmeny(False, "Útban van más bábu")
 
+        # if self.babuha nincs sakkban
+
         return LepesEredmeny(True, "Sáncolás végrehajtható")
 
     def sanc_valaszto(self) -> LepesEredmeny:

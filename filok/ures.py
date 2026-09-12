@@ -6,3 +6,7 @@ class UresMezo:
         self.nev = nev
         self.szin = szin
         self.koordinatak = [jelenlegi_koordinata]
+
+    @property
+    def utolsokoord(self) -> tuple[int, int]:
+        return self.koordinatak[-1]

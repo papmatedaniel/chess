@@ -179,3 +179,68 @@ Körültekintően használja a kódot.Hogyan kötjük össze őket a Fő Ciklusb
         else:
             print(sanc_szabaly.sanc_valaszto(bemenet))
 Körültekintően használja a kódot.Miért ez a tökéletes, professzionális építészet?A Pylance elhallgathat (jogosan): Nincs többé Any vagy None. A BabuSzabaly-ban a bábu mindig bábu, a SancSzabaly-ban meg nincs bábu. Minden típusbiztos.Könnyű volt az áttérés: A 20+ függvényedet nem kellett átírnod! Csak átmásoltad őket az új BabuSzabaly osztály alá. Nem változott a paraméterezésük, nem változott a belső logikájuk.Későbbi bővíthetőség: Ha holnap meg akarod írni a Gyalogátváltozást (GyalogPromocio), egyszerűen csinálhatsz neki egy GyalogPromocioSzabaly(SzabalyAlap) osztályt, ami szintén teljesen egyedi bemeneteket és logikát kezelhet, pontosan ugyanígy!
+
+
+
+Szimulációs ötlet:
+Szimuláció fő használati területei:
+Sakk
+Patt
+Matt
+
+Sakk:
+az az állás ahol a király sakkba van.
+Egyszerre csak 1 király lehet sakkban.
+Ha a legutolsó lépésünk után sakkba van a saját királyunk az nem megengedett lépés
+Ha a leguttolsó lépésünk után sakkba van az ellenség királya, az szabályos lépés, de nem lehet sakkban a sajátunk.
+Jó megoldás lenne az, hogy ha csak vissza adja, hogy sakkba van e/lesz e és így engedi/nem engedi.
+
+Matt:
+Az az állapot, ahol nincs több szabályos lépésünk és sakkba vagyunk. Avagy nem tudjuk sehogy kivédeni a sakkot
+
+Patt:
+Az az állapot, ahol nincs több szabályos lépésünk és nem vagyunk sakkban, és az ellenség sem.
+Avagy végjátéknál, amikor 1-2 oldalról beszorítják a királyt, és csak úgy lehetne ellépni, hogy sakkba legyen, de mivel nem léphet sakkba, és nincs is sakkban
+Patt van.
+Szóval:
+Erre kéne egy univerzális megoldás.
+A szimuláció:
+Szimulálhatjuk az összes létező szabályos lépésünket.
+Ha a szabályos lépések száma 0, akkor játék vége.
+    A) Sakkban vagyunk - Vesztettünk
+    B) Nem vagyunk sakkban - Döntetlen
+    
+
+Ha szabályos lépsek száma több mint nulla, akkor megy a játék
+
+
+Szimuláció úgy nézne ki, hogy a nulladik állástól kezdve mindig lefuttatja az összes szabályos lépést.
+Paraméterei: Szín-amelyik lép.
+
+Visszatérési értéke.
+Szabályos lépések száma.
+Szabályos lépések koordinátái.
+
+Algoritmus:
+Megkapja a színt:
+Veszi az utolsó tábla állást.
+Megkeresi az összes színhez tartozó bábut.
+Minden bábu
+Egy függvényen belül csinálunk egy mély másolatot a tábláról.:
+Egy másik függvény kikeresi az összes bábuhoz tartozó koordinátát.
+Átadja paraméterül vagy a függvényben a program létrehozza.
+Egy ciklus végig megy a minden bábun:
+    - Adott bábun megkeresi az összes szabályos lépést.
+    - Mindet végrehajtja egy új mélymásolt táblán.
+    - Ha a végrehajtott lépés után, a színhez tartozó király sakkba van, akkor az nem szabályos lépés.
+    - Amennyiben van szabályos lépés, nem lesz sakkban az adott szín királya, akkor a jó_szabályos lépések listához adódódnak ezek a koordináta párok(honnan hová):
+        - Nem elég csak a végkoordinátát hozzáadni, mert akkor nem tudjuk hogy melyik bábu léphet oda, emiatt kell koordináta párok.
+        Vagy nem végkoordináta párokat, hanem minden bábu koordinátához lesz rendelve egy lista, hogy hova lephet szabalyosan, es ebbe adodnak majd hozza.
+        Es akkor ez egy szotar lesz: key(honnan, tupple[int, int]), value(hova, [list[tuple[int, int]]])
+
+Miután lefutott a cilus, vissza adjuk a szabályos lépések számát, és a szotar[tuple, list[tuplet]]
+
+Azon gondolkozom, hogy nem túl hatékony minden lépésnek egy új mély másolatot csinálni, egy visszaléptető függvényt is csinálhatnánk.
+
+Vagy a másik, hogy ez elég ágyúval nyúlra lépésnek tűnik, ha nem lenne sakk, akkor csak 1 bábut kéne validálni, és nem minden bábu, minden lépését.
+Így minden új bábu állásnál lefut ez a program.

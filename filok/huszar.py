@@ -8,14 +8,4 @@ class Huszar(Babu):
 
     def lepes(self) -> list[tuple[int, int]]:
         """Hagyományos mozgása a lónak."""
-        lepesek = [
-            (1, 2),
-            (2, 1),
-            (-1, 2),
-            (2, -1),
-            (1, -2),
-            (-2, 1),
-            (-1, -2),
-            (-2, -1),
-        ]
-        return self.hozzad(lepesek)
+        return self.huszar_lepes()
