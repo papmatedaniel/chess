@@ -71,12 +71,13 @@ class Jatek:
 
                     if vegrehajtas.siker:
                         szinek = szinek[::-1]
-                        print(Sakkkezeles(self.tablaobj, Altalanosszabalyok(self.tablaobj)).kiralyvegrehajt("Fehér"))
+                        print(f"{Sakkkezeles(self.tablaobj, Altalanosszabalyok(self.tablaobj), szinek[0]).kiralyvegrehajt('Fehér') = }")
 
                 except (ValueError, IndexError , KeyError):
                     try:
                         szabaly2 = SancSzabaly(
-                            self.tablaobj, self.lepestipusok, bemenet, szinek[0]
+                            self.tablaobj, self.lepestipusok, bemenet, szinek[0],
+                            Sakkkezeles(self.tablaobj, Altalanosszabalyok(self.tablaobj), szinek[0]) 
                         )
                         eredmeny2 = szabaly2.sanc_valaszto()
                         print(eredmeny2.uzenet)

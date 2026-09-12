@@ -1,8 +1,12 @@
+from filok.babu import Babu
+
+
 class Sakkkezeles:
 
-    def __init__(self, tabla, babu):
+    def __init__(self, tabla, babu, szin):
         self.tabla = tabla
         self.babu = babu
+        self.szin = szin
 
     def kiralyvegrehajt(self, szin) -> bool:
         holvan = self.kiralyvalaszto(szin)
@@ -33,26 +37,38 @@ class Sakkkezeles:
         return lista
 
     def kiraly_sakkban_vane(self, kiraly_koordinata) -> bool:
-        # if kiraly_koordinata is None:
-        #     kiraly_koordinata = self.babu.utolsokoord
+        x, y = kiraly_koordinata
+
+        # ideiglenes király objektum
+        ideiglenes_kiraly = Babu(
+            szin=self.szin, nev="Király", jelenlegi_koordinata=kiraly_koordinata
+        )
 
         nagylista = []
-        x, y = kiraly_koordinata
-        kiralyelem = self.tabla.tabla[y][x]
+
         lebont1 = self.lebont(
-            self.babu.hova_uthet_sor(kiralyelem.ortogonalis_lepes(), "Fehér")
+            self.babu.hova_uthet_sor(ideiglenes_kiraly.ortogonalis_lepes(), self.szin)
         )
         nagylista.extend(lebont1)
+
         lebont2 = self.lebont(
-            self.babu.hova_uthet_sor(kiralyelem.diagonalis_lepes(), "Fehér")
+            self.babu.hova_uthet_sor(ideiglenes_kiraly.diagonalis_lepes(), self.szin)
         )
         nagylista.extend(lebont2)
-        lovak = self.lebont(self.babu.hova_uthet(kiralyelem.huszar_lepes(), "Fehér"))
+
+        lovak = self.lebont(
+            self.babu.hova_uthet(ideiglenes_kiraly.huszar_lepes(), self.szin)
+        )
         nagylista.extend(lovak)
+
         for elem in nagylista:
             x, y = elem
-            print(f"{self.tabla.tabla[y][x].utes() = }")
-            if kiraly_koordinata in self.lebont(self.tabla.tabla[y][x].utes()):
-                return True  # sakkban van, talalt egyet aminek az utesebe van benne
+            kozos = []
+            kozos.extend(self.lebont(self.tabla.tabla[y][x].utes()))
+            kozos.extend(self.lebont(self.tabla.tabla[y][x].lepes()))
+            kozos = list(tuple(kozos))
+
+            if kiraly_koordinata in kozos:
+                return True
 
         return False

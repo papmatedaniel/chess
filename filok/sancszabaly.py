@@ -4,12 +4,13 @@ from filok.sanc import Sanc
 
 class SancSzabaly:
 
-    def __init__(self, tabla, lepestipusok, sanc, szin) -> None:
+    def __init__(self, tabla, lepestipusok, sanc, szin, sakkezeles) -> None:
         self.tabla = tabla
         self.lepestipusok = lepestipusok
         self.sanc = sanc
         self.szin = szin
         self.sor = Sanc.szinek[self.szin]
+        self.sakkezeles = sakkezeles
 
     def kettokozottikoordinatak(self, egy, ketto) -> list[tuple[int, int]]:
         """Csak vízszintben"""
@@ -35,13 +36,25 @@ class SancSzabaly:
         if len(kiraly.koordinatak) != 1 or len(bastya.koordinatak) != 1:
             return LepesEredmeny(False, "Korábbi lépés miatt nem sáncolhatsz")
 
-        if not self.teruletszabad(
-            self.kettokozottikoordinatak(kiraly.koordinatak[-1], bastya.koordinatak[-1])
-        ):
+        kettokozott = self.kettokozottikoordinatak(
+            kiraly.koordinatak[-1], bastya.koordinatak[-1]
+        )
+        if not self.teruletszabad(kettokozott):
             return LepesEredmeny(False, "Útban van más bábu")
 
-        # if self.babuha nincs sakkban
+        terulettamadotte = [self.sakkezeles.kiraly_sakkban_vane(kiraly.koordinatak[-1])]
+        print(f"KURVA {kettokozott = }")
+        print(kettokozott[0])
+        print(kettokozott[1])
+        for elem in kettokozott:
+            print("MIA PICSSA")
+            print(elem)
+            terulettamadotte.append(self.sakkezeles.kiraly_sakkban_vane(elem))
 
+        if any(terulettamadotte):
+            return LepesEredmeny(False, "Támadott a király/mozgástere")
+
+        print(f"{terulettamadotte = }")
         return LepesEredmeny(True, "Sáncolás végrehajtható")
 
     def sanc_valaszto(self) -> LepesEredmeny:

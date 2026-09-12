@@ -1,12 +1,10 @@
-class UresMezo:
+from filok.babu import Babu
 
-    def __init__(
-        self, nev="nincs", szin="nincs", jelenlegi_koordinata=(-1, -1)
-    ) -> None:
-        self.nev = nev
-        self.szin = szin
-        self.koordinatak = [jelenlegi_koordinata]
 
-    @property
-    def utolsokoord(self) -> tuple[int, int]:
-        return self.koordinatak[-1]
+class UresMezo(Babu):
+
+    def __init__(self) -> None:
+        super().__init__(nev="nincs")
+
+    def lepes(self):
+        return []
