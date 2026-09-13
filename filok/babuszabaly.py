@@ -1,5 +1,4 @@
 from filok.dataclassok.lepeseredmeny import LepesEredmeny
-from filok.dataclassok.lepestipusok import Lepestipusok
 
 
 class BabuSzabaly:

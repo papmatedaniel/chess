@@ -58,7 +58,6 @@ class Sakkkezeles:
             kozos = []
             kozos.extend(self.lebont(self.tabla.tabla[y][x].utes()))
             kozos.extend(self.lebont(self.tabla.tabla[y][x].lepes()))
-            kozos = list(tuple(kozos))
 
             if kiraly_koordinata in kozos:
                 return True

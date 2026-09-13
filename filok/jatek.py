@@ -1,9 +1,9 @@
-from filok.babuszabaly import BabuSzabaly
-from filok.specialis_muveletek.sancszabaly import SancSzabaly
-from filok.babuk.babu import Babu
-from filok.specialis_muveletek.gyalog_lepes import Gyaloglepes
 from filok.alltalanosszabalyok import Altalanosszabalyok
+from filok.babuszabaly import BabuSzabaly
+from filok.specialis_muveletek.gyalog_lepes import Gyaloglepes
 from filok.specialis_muveletek.kiraly_sakkezeles import Sakkkezeles
+from filok.specialis_muveletek.sancszabaly import SancSzabaly
+
 
 class Jatek:
     """Felhasználói interface. Ez lép közvetlen kapcsolatba a felhasználóval."""
