@@ -1,7 +1,7 @@
 import copy
 from typing import Any, TypeGuard
 
-from filok.lepestipusok import Lepestipusok
+from filok.dataclassok.lepestipusok import Lepestipusok
 
 
 class Tabla:
@@ -98,7 +98,7 @@ class Tabla:
 
     def _uresit_mezo(self, x: int, y: int) -> None:
         """Segédfüggvény egy mező kiürítésére."""
-        uj_ures = self.mezo() if callable(self.mezo) else self.mezo
+        uj_ures = copy.deepcopy(self.mezo)
         self.tabla[y][x] = uj_ures
         if hasattr(self.tabla[y][x], "koordinatak"):
             self.tabla[y][x].koordinatak = [(x, y)]

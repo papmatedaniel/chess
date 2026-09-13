@@ -1,9 +1,9 @@
 from filok.babuszabaly import BabuSzabaly
-from filok.sancszabaly import SancSzabaly
-from filok.babu import Babu
-from filok.gyalog_lepes import Gyaloglepes
+from filok.specialis_muveletek.sancszabaly import SancSzabaly
+from filok.babuk.babu import Babu
+from filok.specialis_muveletek.gyalog_lepes import Gyaloglepes
 from filok.alltalanosszabalyok import Altalanosszabalyok
-from filok.kiraly_sakkezeles import Sakkkezeles
+from filok.specialis_muveletek.kiraly_sakkezeles import Sakkkezeles
 
 class Jatek:
     """Felhasználói interface. Ez lép közvetlen kapcsolatba a felhasználóval."""
@@ -47,51 +47,80 @@ class Jatek:
                 try:
                     x1, y1, x2, y2 = self.koordinata_beker(bemenet)
 
+                    # 1. BabuSzabaly példányosítás (helyes konstruktor)
                     szabaly = BabuSzabaly(
-                        self.tablaobj,
                         self.lepestipusok,
-                        szinek[0],
-                        self.tablaobj.tabla[y1][x1],
-                        Babu(),
-                        Altalanosszabalyok(self.tablaobj),
-                        Gyaloglepes(self.tablaobj,
-                                    self.tablaobj.tabla[y1][x1],
-                                    Altalanosszabalyok(self.tablaobj)
-                                    )
+                        Altalanosszabalyok()
                     )
 
-                    ellenorzes = szabaly.lepes_ellenorzo((x1, y1), (x2, y2))
+                    # 2. Általános ellenőrzés
+                    ellenorzes = szabaly.lepes_ellenorzo(
+                        self.tablaobj,
+                        (x1, y1),
+                        szinek[0],
+                        (x2, y2)
+                    )
                     print(ellenorzes.uzenet)
 
                     if not ellenorzes.siker:
                         continue
 
-                    vegrehajtas = szabaly.babu_valaszto((x1, y1), (x2, y2))
+                    # 3. Bábuspecifikus ellenőrzés
+                    babu = self.tablaobj.tabla[y1][x1]
+                    gyalog = Gyaloglepes(Altalanosszabalyok())
+
+                    vegrehajtas = szabaly.babu_valaszto(
+                        self.tablaobj,
+                        babu,
+                        gyalog,
+                        (x1, y1),
+                        (x2, y2)
+                    )
                     print(vegrehajtas.uzenet)
 
+                    # 4. Ha szabályos → végrehajtás
                     if vegrehajtas.siker:
-                        szinek = szinek[::-1]
-                        print(f"{Sakkkezeles(self.tablaobj, Altalanosszabalyok(self.tablaobj), szinek[0]).kiralyvegrehajt('Fehér') = }")
-
-                except (ValueError, IndexError , KeyError):
-                    try:
-                        szabaly2 = SancSzabaly(
-                            self.tablaobj, self.lepestipusok, bemenet, szinek[0],
-                            Sakkkezeles(self.tablaobj, Altalanosszabalyok(self.tablaobj), szinek[0]) 
+                        szabaly.altalanos_lepes_vegrehajtas(
+                            self.tablaobj,
+                            vegrehajtas.objektum
                         )
+
+                        szinek = szinek[::-1]
+
+                        print(
+                            f"{Sakkkezeles(self.tablaobj, szabaly, szinek[0]).kiralyvegrehajt('Fehér') = }"
+                        )
+
+                except (ValueError, IndexError, KeyError):
+                    # 5. SÁNC KEZELÉSE (javított verzió)
+                    try:
+                        szabaly = BabuSzabaly(self.lepestipusok, Altalanosszabalyok())
+                        szabaly2 = SancSzabaly(
+                            self.tablaobj,
+                            self.lepestipusok,
+                            bemenet,
+                            szinek[0],
+                            Sakkkezeles(self.tablaobj, szabaly, szinek[0])
+                        )
+
+                        # 5/a. Sánc ellenőrzés + lépésobjektum létrehozása
                         eredmeny2 = szabaly2.sanc_valaszto()
                         print(eredmeny2.uzenet)
 
+                        # 5/b. Ha szabályos → SÁNC VÉGREHAJTÁSA
                         if eredmeny2.siker:
+                            szabaly2.sanc_lepes(self.tablaobj, eredmeny2.objektum)
                             szinek = szinek[::-1]
 
-                    except (KeyError , ValueError, IndexError):
+                    except (KeyError, ValueError, IndexError):
                         print("Hibás input")
                         continue
 
             except KeyboardInterrupt:
                 print("\nKilépés")
                 break
+
+
 
     def jatekmenet(self) -> None:
         # self.nev_beker()

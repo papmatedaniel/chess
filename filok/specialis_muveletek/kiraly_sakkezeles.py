@@ -1,4 +1,4 @@
-from filok.babu import Babu
+from filok.babuk.babu import Babu
 
 
 class Sakkkezeles:
@@ -13,18 +13,10 @@ class Sakkkezeles:
         return self.kiraly_sakkban_vane(holvan)
 
     def kiralyvalaszto(self, szin) -> tuple[int, int]:
-        # szin=Fehér/Fekete
-        # Két koncepció:
-        # Mindig megadjuk, hogy melyik szinűt keressük
-        # Ezt hasznalhatju ugy, hogy minden allasnal lefuttatjuk
-        # Megadjuk manualisan a szint
-        # Vagy a lepeslistabol az utolso szint
         for sor in self.tabla.tabla:
-            for oszlop_elem in sor:
-                x, y = oszlop_elem.utolsokoord
-                aktualis_babu = self.tabla.tabla[y][x]
-                if aktualis_babu.nev == "Király" and aktualis_babu.szin == szin:
-                    return (x, y)
+            for babu in sor:
+                if babu.nev == "Király" and babu.szin == szin:
+                    return babu.utolsokoord
         return (-1, -1)
 
     def lebont(self, koordinatalista) -> list[tuple[int, int]]:

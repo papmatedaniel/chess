@@ -1,7 +1,5 @@
 class Gyaloglepes:
-    def __init__(self, tabla, babu, altalanosszabalyok):
-        self.tabla = tabla
-        self.babu = babu
+    def __init__(self, altalanosszabalyok) -> None:
         self.altalanosszabalyok = altalanosszabalyok
 
     def gyalog_duplalepese(self, koordinatak) -> bool:
@@ -11,24 +9,24 @@ class Gyaloglepes:
             return x1 == x2 and abs(y2 - y1) == 2
         return False
 
-    def gyalog_hova_lephet_enpassant(self) -> dict:
+    def gyalog_hova_lephet_enpassant(self, tabla, babu) -> dict:
 
         alap_valasz: dict[str, list[tuple[int, int]] | tuple[int, int] | None] = {
             "vegkoordinata": [],
             "leveheto_koordinata": None,
         }
 
-        if len(self.tabla.lepesek) == 0:  # nem_lepett
+        if len(tabla.lepesek) == 0:  # nem_lepett
             return alap_valasz
 
-        utolso = self.tabla.lepesek[-1]
+        utolso = tabla.lepesek[-1]
         if utolso.babutipus1 != "Gyalog":
             return alap_valasz
 
         x1, y1 = utolso.hova1
-        x2, y2 = self.babu.utolsokoord
+        x2, y2 = babu.utolsokoord
 
-        if not self.gyalog_duplalepese(self.tabla.tabla[y1][x1].koordinatak):
+        if not self.gyalog_duplalepese(tabla.tabla[y1][x1].koordinatak):
             return alap_valasz
 
         if y2 != y1 or abs(x2 - x1) != 1:
@@ -37,9 +35,9 @@ class Gyaloglepes:
         jo_koordinatak = []
         leveheto_koordinata = None
 
-        for i in self.babu.utes():
+        for i in babu.utes():
             x = i[0]
-            if self.tabla.bentvane(i) and self.tabla.urese(i) and x == x1:
+            if tabla.bentvane(i) and tabla.urese(i) and x == x1:
                 leveheto_koordinata = utolso.hova1
                 jo_koordinatak.append(i)
 
@@ -48,19 +46,19 @@ class Gyaloglepes:
             "leveheto_koordinata": leveheto_koordinata,
         }
 
-    def gyalog_hova_lephet(self) -> list[tuple[int, int]]:
+    def gyalog_hova_lephet(self, tabla, babu) -> list[tuple[int, int]]:
         # Ha előre 1 lépés engedélyezett, 2-t próbálunk
         if (
-            len(self.babu.koordinatak) == 1
-            and len(self.altalanosszabalyok.hova_lephet(self.babu.lepes())) == 1
+            len(babu.koordinatak) == 1
+            and len(self.altalanosszabalyok.hova_lephet(tabla, babu.lepes())) == 1
         ):
-            if self.babu.utolsokoord[-1] in [1, 6]:  # második soros gyalogok
-                return self.babu.elso_lepes()
+            if babu.utolsokoord[-1] in [1, 6]:  # második soros gyalogok
+                return babu.elso_lepes()
 
-        return self.altalanosszabalyok.hova_lephet(self.babu.lepes())
+        return self.altalanosszabalyok.hova_lephet(tabla, babu.lepes())
 
-    def gyalog_atvaltozhat_e(self):
-        return self.babu.utolsokoord[1] in [1, 6] and len(self.babu.koordinatak) > 1
+    def gyalog_atvaltozhat_e(self, babu):
+        return babu.utolsokoord[1] in [1, 6] and len(babu.koordinatak) > 1
 
     def gyalog_atvaltozas(self) -> str:
         szotar = {"v": "Vezér", "b": "Bástya", "h": "Huszár", "f": "Futó"}

@@ -1,13 +1,13 @@
-from filok.bastya import Bastya
-from filok.futo import Futo
-from filok.gyalog import Gyalog
-from filok.huszar import Huszar
+from filok.babuk.bastya import Bastya
+from filok.babuk.futo import Futo
+from filok.babuk.gyalog import Gyalog
+from filok.babuk.huszar import Huszar
 from filok.jatek import Jatek
-from filok.kiraly import Kiraly
-from filok.lepestipusok import Lepestipusok
+from filok.babuk.kiraly import Kiraly
+from filok.dataclassok.lepestipusok import Lepestipusok
 from filok.tabla import Tabla
-from filok.ures import UresMezo
-from filok.vezer import Vezer
+from filok.babuk.ures import UresMezo
+from filok.babuk.vezer import Vezer
 
 ures = UresMezo()
 gyalog = Gyalog()
