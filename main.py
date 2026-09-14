@@ -5,7 +5,7 @@ from filok.babuk.huszar import Huszar
 from filok.babuk.kiraly import Kiraly
 from filok.babuk.ures import UresMezo
 from filok.babuk.vezer import Vezer
-from filok.dataclassok.lepestipusok import Lepestipusok
+from filok.dataclassok.lepestipusok import LepesTipus
 from filok.jatek import Jatek
 from filok.tabla import Tabla
 
@@ -25,7 +25,7 @@ tabla = Tabla(
     vezer=vezer,
     kiraly=kiraly,
 )
-lepestipus = Lepestipusok
+lepestipus = LepesTipus
 jatek = Jatek(tabla, lepestipus)
 jatek.jatekmenet()
 

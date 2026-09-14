@@ -1,54 +1,65 @@
+from filok.dataclassok.lepestipusok import Pozicio
+
+
 class Altalanosszabalyok:
 
-    def hova_lephet(self, tabla, koordinatak) -> list[tuple[int, int]]:
-        jo_koordinatak = []
+    def hova_lephet(
+        self, tabla, poziciok: list[Pozicio]
+    ) -> list[Pozicio]:
+        jo_poziciok: list[Pozicio] = []
 
-        for i in koordinatak:
-            if tabla.bentvane(i) and tabla.urese(i):
-                jo_koordinatak.append(i)
+        for pos in poziciok:
+            if tabla.bentvane(pos) and tabla.urese(pos):
+                jo_poziciok.append(pos)
 
-        return jo_koordinatak
+        return jo_poziciok
 
-    def hova_uthet(self, tabla, koordinatak, szin) -> list[tuple[int, int]]:
-        jo_koordinatak = []
+    def hova_uthet(
+        self, tabla, poziciok: list[Pozicio], szin: str
+    ) -> list[Pozicio]:
+        jo_poziciok: list[Pozicio] = []
 
-        for i in koordinatak:
+        for pos in poziciok:
             if (
-                tabla.bentvane(i)
-                and not tabla.urese(i)
-                and tabla.tabla[i[1]][i[0]].szin != szin
+                tabla.bentvane(pos)
+                and not tabla.urese(pos)
+                and tabla.mezo_lekerdezese(pos).szin != szin
             ):
-                jo_koordinatak.append(i)
+                jo_poziciok.append(pos)
 
-        return jo_koordinatak
+        return jo_poziciok
 
-    def hova_lephet_sor(self, tabla, koordinatak) -> list[tuple[int, int]]:
-        """Egyenes lépssorozat, bástya, futó, vezér"""
-        jo_koordinatak = []
+    def hova_lephet_sor(
+        self, tabla, iranyok: list[list[Pozicio]]
+    ) -> list[Pozicio]:
+        """Egyenes lépéssorozat üres mezőkre: bástya, futó, vezér."""
+        jo_poziciok: list[Pozicio] = []
 
-        for i in koordinatak:
-            for j in i:
-                if tabla.bentvane(j) and tabla.urese(j):
-                    jo_koordinatak.append(j)
+        for irany in iranyok:
+            for pos in irany:
+                if tabla.bentvane(pos) and tabla.urese(pos):
+                    jo_poziciok.append(pos)
                 else:
                     break
 
-        return jo_koordinatak
+        return jo_poziciok
 
-    def hova_uthet_sor(self, tabla, koordinatak, szin) -> list[tuple[int, int]]:
-        """egyenes lépssorozat, bástya, futó"""
-        jo_koordinatak = []
+    def hova_uthet_sor(
+        self, tabla, iranyok: list[list[Pozicio]], szin: str
+    ) -> list[Pozicio]:
+        """Egyenes ütési sorozat: bástya, futó, vezér."""
+        jo_poziciok: list[Pozicio] = []
 
-        for i in koordinatak:
-            for j in i:
-                if (
-                    tabla.bentvane(j)
-                    and not tabla.urese(j)
-                    and tabla.tabla[j[1]][j[0]].szin != szin
-                ):
-                    jo_koordinatak.append(j)
-                    break
-                if not tabla.bentvane(j) or tabla.tabla[j[1]][j[0]].szin == szin:
+        for irany in iranyok:
+            for pos in irany:
+                if not tabla.bentvane(pos):
                     break
 
-        return jo_koordinatak
+                if not tabla.urese(pos):
+                    cel_babu = tabla.mezo_lekerdezese(pos)
+                    if cel_babu.szin != szin:
+                        jo_poziciok.append(pos)
+                    # Ha bármilyen bábu áll az úton (akár saját, akár ellenség), a sugár megtörik
+                    break
+
+        return jo_poziciok

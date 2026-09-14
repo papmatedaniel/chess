@@ -1,4 +1,5 @@
 from filok.babuk.babu import Babu
+from filok.dataclassok.lepestipusok import Pozicio
 
 
 class Huszar(Babu):
@@ -6,6 +7,6 @@ class Huszar(Babu):
     def __init__(self) -> None:
         super().__init__(nev="Huszár")
 
-    def lepes(self) -> list[tuple[int, int]]:
+    def lepes(self) -> list[Pozicio]:
         """Hagyományos mozgása a lónak."""
         return self.huszar_lepes()

@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 
-from filok.dataclassok import lepestipusok
-
+from filok.dataclassok.lepestipusok import Lepes
 
 @dataclass
 class LepesEredmeny:
     siker: bool
     uzenet: str
-    objektum: lepestipusok.Lepestipusok | None
+    objektum: Lepes | None

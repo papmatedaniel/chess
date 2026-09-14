@@ -1,4 +1,5 @@
 from filok.dataclassok.lepeseredmeny import LepesEredmeny
+from filok.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 from filok.dataclassok.sanc import Sanc
 
 
@@ -6,56 +7,78 @@ class SancSzabaly:
 
     def __init__(self, tabla, lepestipusok, sanc, szin, sakkezeles) -> None:
         self.tabla = tabla
-        self.lepestipusok = lepestipusok
         self.sanc = sanc
         self.szin = szin
         self.sor = Sanc.szinek[self.szin]
         self.sakkezeles = sakkezeles
 
-    def kettokozottikoordinatak(self, egy, ketto) -> list[tuple[int, int]]:
-        """Csak vízszintben"""
-        y = egy[1]
-        x1, x2 = sorted([egy[0], ketto[0]])
-        return [(i, y) for i in range(x1 + 1, x2)]
+    def kettokozottikoordinatak(
+        self, egy: Pozicio, ketto: Pozicio
+    ) -> list[Pozicio]:
+        """A király és bástya közötti üresnek kötelező mezők listája."""
+        sor = egy.sor
+        oszlop1, oszlop2 = sorted([egy.oszlop, ketto.oszlop])
+        return [
+            Pozicio(sor=sor, oszlop=i)
+            for i in range(oszlop1 + 1, oszlop2)
+        ]
 
-    def teruletszabad(self, lista) -> bool:
-        """Megkapja a területet, és vissza adja, hogy van e ott bábu"""
-        return all(self.tabla.urese(i) for i in lista)
+    def teruletszabad(self, poziciok: list[Pozicio]) -> bool:
+        """Megadja, hogy az adott mezők mindegyike üres-e."""
+        return all(self.tabla.urese(pos) for pos in poziciok)
 
     def sanc_lephet_e(self) -> LepesEredmeny:
-
-        if not self.sanc in ["0-0", "0-0-0"]:
+        if self.sanc not in ["0-0", "0-0-0"]:
             return LepesEredmeny(False, "Nem létező sánc típus", None)
 
-        egeszsor = self.tabla.tabla[self.sor]
-        kiraly = egeszsor[Sanc.kiraly_honnan]
-        bastya = egeszsor[Sanc.sancvalaszto[self.sanc]["bastya_honnan"]]
+        kiraly_oszlop = Sanc.kiraly_honnan
+        bastya_oszlop = Sanc.sancvalaszto[self.sanc]["bastya_honnan"]
+
+        kiraly_pos = Pozicio(sor=self.sor, oszlop=kiraly_oszlop)
+        bastya_pos = Pozicio(sor=self.sor, oszlop=bastya_oszlop)
+
+        kiraly = self.tabla.mezo_lekerdezese(kiraly_pos)
+        bastya = self.tabla.mezo_lekerdezese(bastya_pos)
+
         if kiraly.nev != "Király" or bastya.nev != "Bástya":
             return LepesEredmeny(False, "Hiányzó bábu", None)
 
         if len(kiraly.koordinatak) != 1 or len(bastya.koordinatak) != 1:
             return LepesEredmeny(False, "Korábbi lépés miatt nem sáncolhatsz", None)
 
-        kettokozott = self.kettokozottikoordinatak(
-            kiraly.koordinatak[-1], bastya.koordinatak[-1]
-        )
+        kettokozott = self.kettokozottikoordinatak(kiraly_pos, bastya_pos)
         if not self.teruletszabad(kettokozott):
             return LepesEredmeny(False, "Útban van más bábu", None)
 
-        terulettamadotte = [self.sakkezeles.kiraly_sakkban_vane(kiraly.koordinatak[-1])]
-        for elem in kettokozott:
-            terulettamadotte.append(self.sakkezeles.kiraly_sakkban_vane(elem))
+        # A király által érintett mezők ellenőrzése (kezdő, áthaladó, érkező mező nem lehet sakkban)
+        kiraly_cel_oszlop = Sanc.sancvalaszto[self.sanc]["kiraly_hova"]
+        lepes_irany = 1 if kiraly_cel_oszlop > kiraly_oszlop else -1
 
-        if any(terulettamadotte):
+        kiraly_utvonala = [
+            kiraly_pos,
+            Pozicio(sor=self.sor, oszlop=kiraly_oszlop + lepes_irany),
+            Pozicio(sor=self.sor, oszlop=kiraly_cel_oszlop),
+        ]
+
+        if any(self.sakkezeles.kiraly_sakkban_vane(pos) for pos in kiraly_utvonala):
             return LepesEredmeny(False, "Támadott a király/mozgástere", None)
 
         return LepesEredmeny(True, "Sáncolás végrehajtható", None)
 
-    def sanc_koordinatak(self):
-        kiraly_honnan = (Sanc.kiraly_honnan, self.sor)
-        bastya_honnan = (Sanc.sancvalaszto[self.sanc]["bastya_honnan"], self.sor)
-        kiraly_hova = (Sanc.sancvalaszto[self.sanc]["kiraly_hova"], self.sor)
-        bastya_hova = (Sanc.sancvalaszto[self.sanc]["bastya_hova"], self.sor)
+    def sanc_koordinatak(self) -> tuple[Pozicio, Pozicio, Pozicio, Pozicio]:
+        kiraly_honnan = Pozicio(sor=self.sor, oszlop=Sanc.kiraly_honnan)
+        bastya_honnan = Pozicio(
+            sor=self.sor,
+            oszlop=Sanc.sancvalaszto[self.sanc]["bastya_honnan"],
+        )
+        kiraly_hova = Pozicio(
+            sor=self.sor,
+            oszlop=Sanc.sancvalaszto[self.sanc]["kiraly_hova"],
+        )
+        bastya_hova = Pozicio(
+            sor=self.sor,
+            oszlop=Sanc.sancvalaszto[self.sanc]["bastya_hova"],
+        )
 
         return kiraly_honnan, bastya_honnan, kiraly_hova, bastya_hova
 
@@ -65,23 +88,14 @@ class SancSzabaly:
         if not eredmeny.siker:
             return eredmeny
 
-        # Koordináták kiszedése
         kiraly_honnan, bastya_honnan, kiraly_hova, bastya_hova = self.sanc_koordinatak()
 
-        # Lépésobjektum létrehozása (DE NEM végrehajtása!)
-        lepesobj = self.lepestipusok(
-            muvelet="sanc",
-            honnan1=kiraly_honnan,
-            hova1=kiraly_hova,
-            babutipus1=Sanc.babu1,
-            honnan2=bastya_honnan,
-            hova2=bastya_hova,
-            babutipus2=Sanc.babu2,
+        lepesobj = Lepes(
+            tipus=LepesTipus.SANC,
+            honnan=kiraly_honnan,
+            hova=kiraly_hova,
+            bastya_honnan=bastya_honnan,
+            bastya_hova=bastya_hova,
         )
 
         return LepesEredmeny(True, "Sánc végrehajtható", lepesobj)
-
-    def sanc_lepes(self, tabla, lepesobj) -> LepesEredmeny:
-        tabla.lepes_mentes(lepesobj)
-        tabla.tablamodosit()
-        return LepesEredmeny(True, "Sánc végrehajtva", lepesobj)

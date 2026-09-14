@@ -1,7 +1,7 @@
 import copy
-from typing import Any, TypeGuard
+from typing import Any
 
-from filok.dataclassok.lepestipusok import Lepestipusok
+from filok.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 
 
 class Tabla:
@@ -16,18 +16,18 @@ class Tabla:
         self.kiraly = kiraly
 
         self.tabla: list[list[Any]] = []
-        self.lepesek: list[Lepestipusok] = []
+        self.lepesek: list[Lepes] = []
 
     def tablageneralas(self) -> None:
         """Teljes sakk kezdőállás legenerálása."""
-
         for y in range(8):
             sor = []
             for x in range(8):
+                poz = Pozicio(sor=y, oszlop=x)
 
                 # Üres mező alapértelmezésben
                 uj_mezo = copy.deepcopy(self.mezo)
-                uj_mezo.koordinatak[-1] = (x, y)
+                uj_mezo.koordinatak[-1] = poz
 
                 # --- FEKETE FŐBÁBUK (y == 0) ---
                 if y == 0:
@@ -42,12 +42,11 @@ class Tabla:
                     elif x == 4:
                         babu = copy.deepcopy(self.kiraly)
                     else:
-                        # Pyright kedvéért, bár ide sosem jut el
                         sor.append(uj_mezo)
                         continue
 
                     babu.szin = "Fekete"
-                    babu.koordinatak[-1] = (x, y)
+                    babu.koordinatak[-1] = poz
                     sor.append(babu)
                     continue
 
@@ -55,7 +54,7 @@ class Tabla:
                 if y == 1:
                     babu = copy.deepcopy(self.gyalog)
                     babu.szin = "Fekete"
-                    babu.koordinatak[-1] = (x, y)
+                    babu.koordinatak[-1] = poz
                     sor.append(babu)
                     continue
 
@@ -63,7 +62,7 @@ class Tabla:
                 if y == 6:
                     babu = copy.deepcopy(self.gyalog)
                     babu.szin = "Fehér"
-                    babu.koordinatak[-1] = (x, y)
+                    babu.koordinatak[-1] = poz
                     sor.append(babu)
                     continue
 
@@ -84,7 +83,7 @@ class Tabla:
                         continue
 
                     babu.szin = "Fehér"
-                    babu.koordinatak[-1] = (x, y)
+                    babu.koordinatak[-1] = poz
                     sor.append(babu)
                     continue
 
@@ -93,112 +92,131 @@ class Tabla:
 
             self.tabla.append(sor)
 
-    def valid(self, adat: tuple[int, int] | None) -> TypeGuard[tuple[int, int]]:
-        return adat is not None
+    # ---------------------------------------------------------
+    # Pozíció alapú mezőkezelő metódusok
+    # ---------------------------------------------------------
 
-    def _uresit_mezo(self, x: int, y: int) -> None:
-        """Segédfüggvény egy mező kiürítésére."""
+    def bentvane(self, pozicio: Pozicio) -> bool:
+        """Ellenőrzi, hogy a pozíció a pályán belül van-e."""
+        return pozicio.palyan_van()
+
+    def urese(self, pozicio: Pozicio) -> bool:
+        """Ellenőrzi, hogy a megadott mező üres-e."""
+        return self.tabla[pozicio.sor][pozicio.oszlop].nev == "nincs"
+
+    def mezo_lekerdezese(self, pozicio: Pozicio) -> Any:
+        return self.tabla[pozicio.sor][pozicio.oszlop]
+
+    def mezo_beallitasa(self, pozicio: Pozicio, babu: Any) -> None:
+        self.tabla[pozicio.sor][pozicio.oszlop] = babu
+        if hasattr(babu, "koordinatak"):
+            babu.koordinatak.append(pozicio)
+
+    def _uresit_mezo(self, pozicio: Pozicio) -> None:
         uj_ures = copy.deepcopy(self.mezo)
-        self.tabla[y][x] = uj_ures
-        if hasattr(self.tabla[y][x], "koordinatak"):
-            self.tabla[y][x].koordinatak = [(x, y)]
+        uj_ures.koordinatak = [pozicio]
+        self.tabla[pozicio.sor][pozicio.oszlop] = uj_ures
 
-    def _mozgat_babu(self, honnan: tuple[int, int], hova: tuple[int, int]) -> None:
-        """Segédfüggvény egy figura áthelyezésére és a régi hely kiürítésére."""
-        x1, y1 = honnan
-        x2, y2 = hova
+    def _mozgat_babu(self, honnan: Pozicio, hova: Pozicio) -> None:
+        babu = self.mezo_lekerdezese(honnan)
+        self.mezo_beallitasa(hova, babu)
+        self._uresit_mezo(honnan)
 
-        # Áttesszük a figurát a célmezőre
-        self.tabla[y2][x2] = self.tabla[y1][x1]
-        if hasattr(self.tabla[y2][x2], "koordinatak"):
-            self.tabla[y2][x2].koordinatak.append((x2, y2))
+    def _uj_babu_letrehozasa(self, pozicio: Pozicio, babutipus: str | None, szin: str) -> None:
+        uj_babu = None
+        if babutipus == "Vezér":
+            uj_babu = copy.deepcopy(self.vezer)
+        elif babutipus == "Bástya":
+            uj_babu = copy.deepcopy(self.bastya)
+        elif babutipus == "Huszár":
+            uj_babu = copy.deepcopy(self.huszar)
+        elif babutipus == "Futó":
+            uj_babu = copy.deepcopy(self.futo)
 
-        # A startmezőt kiürítjük
-        self._uresit_mezo(x1, y1)
+        if uj_babu is None:
+            raise ValueError(f"Ismeretlen átváltozási bábutípus: {babutipus}")
 
-    def tablamodosit(self) -> None:
+        uj_babu.szin = szin
+        uj_babu.koordinatak = [pozicio]
+        self.tabla[pozicio.sor][pozicio.oszlop] = uj_babu
+
+    # ---------------------------------------------------------
+    # Lépés végrehajtása és visszavonása
+    # ---------------------------------------------------------
+
+    def lepes_vegrehajtas(self, lepes: Lepes) -> None:
+        """Determinisztikus lépésvégrehajtás a LepesTipus alapján."""
+        match lepes.tipus:
+            case LepesTipus.SIMA:
+                self._mozgat_babu(lepes.honnan, lepes.hova)
+
+            case LepesTipus.UTES:
+                self._uresit_mezo(lepes.hova)
+                self._mozgat_babu(lepes.honnan, lepes.hova)
+
+            case LepesTipus.SANC:
+                assert lepes.bastya_honnan is not None and lepes.bastya_hova is not None
+                self._mozgat_babu(lepes.honnan, lepes.hova)
+                self._mozgat_babu(lepes.bastya_honnan, lepes.bastya_hova)
+
+            case LepesTipus.EN_PASSANT:
+                assert lepes.levett_babu_pozicio is not None
+                self._uresit_mezo(lepes.levett_babu_pozicio)
+                self._mozgat_babu(lepes.honnan, lepes.hova)
+
+            case LepesTipus.ATVALTOZAS:
+                szin = self.mezo_lekerdezese(lepes.honnan).szin
+                self._uresit_mezo(lepes.honnan)
+                self._uj_babu_letrehozasa(lepes.hova, lepes.uj_babu_tipus, szin)
+
+            case LepesTipus.ATVALTOZAS_UTESSEL:
+                szin = self.mezo_lekerdezese(lepes.honnan).szin
+                self._uresit_mezo(lepes.hova)
+                self._uresit_mezo(lepes.honnan)
+                self._uj_babu_letrehozasa(lepes.hova, lepes.uj_babu_tipus, szin)
+
+        self.lepesek.append(lepes)
+
+    def lepes_visszavonas(self) -> None:
+        """A legutolsó lépés visszavonása."""
         if not self.lepesek:
             return
 
-        utolso = self.lepesek[-1]
-        muvelet = utolso.muvelet
+        lepes = self.lepesek.pop()
 
-        honnan1 = utolso.honnan1
-        hova1 = utolso.hova1
-        levett_babu_koord = utolso.levett_babukoordinataja
-        honnan2 = utolso.honnan2
-        hova2 = utolso.hova2
-        atvaltozott_babu_tipusa = utolso.atvaltozott_babu_tipusa
-        babuszin = utolso.babuszin
-        uj_babu: Any | None = None
-        match muvelet:
+        match lepes.tipus:
+            case LepesTipus.SIMA:
+                self._mozgat_babu(lepes.hova, lepes.honnan)
 
-            case "lepes" | "utes":
-                if self.valid(honnan1) and self.valid(hova1):
-                    self._mozgat_babu(honnan1, hova1)
+            case LepesTipus.UTES:
+                self._mozgat_babu(lepes.hova, lepes.honnan)
+                self.mezo_beallitasa(lepes.hova, lepes.levett_babu)
 
-            case "enpassant":
-                if (
-                    self.valid(honnan1)
-                    and self.valid(hova1)
-                    and self.valid(levett_babu_koord)
-                ):
-                    self._uresit_mezo(*levett_babu_koord)
-                    self._mozgat_babu(honnan1, hova1)
+            case LepesTipus.SANC:
+                assert lepes.bastya_honnan is not None and lepes.bastya_hova is not None
+                self._mozgat_babu(lepes.hova, lepes.honnan)
+                self._mozgat_babu(lepes.bastya_hova, lepes.bastya_honnan)
 
-            case "sanc":
-                if (
-                    self.valid(honnan1)
-                    and self.valid(hova1)
-                    and self.valid(honnan2)
-                    and self.valid(hova2)
-                ):
-                    self._mozgat_babu(honnan1, hova1)
-                    self._mozgat_babu(honnan2, hova2)
+            case LepesTipus.EN_PASSANT:
+                assert lepes.levett_babu_pozicio is not None
+                self._mozgat_babu(lepes.hova, lepes.honnan)
+                self.mezo_beallitasa(lepes.levett_babu_pozicio, lepes.levett_babu)
 
-            case _:
-                print(f"Ismeretlen művelet: {muvelet}")
+            case LepesTipus.ATVALTOZAS:
+                szin = self.mezo_lekerdezese(lepes.hova).szin
+                self._uresit_mezo(lepes.hova)
+                gyalog = copy.deepcopy(self.gyalog)
+                gyalog.szin = szin
+                self.mezo_beallitasa(lepes.honnan, gyalog)
 
-        # -------------------------
-        # Gyalog átváltozás (javított)
-        # -------------------------
-        if atvaltozott_babu_tipusa is not None and self.valid(hova1):
-            x, y = hova1
-
-            # Ugyanaz a minta, mint a kezdőtáblánál: deepcopy prototípus báburól
-            if atvaltozott_babu_tipusa == "Vezér":
-                uj_babu = copy.deepcopy(self.vezer)
-            elif atvaltozott_babu_tipusa == "Bástya":
-                uj_babu = copy.deepcopy(self.bastya)
-            elif atvaltozott_babu_tipusa == "Huszár":
-                uj_babu = copy.deepcopy(self.huszar)
-            elif atvaltozott_babu_tipusa == "Futó":
-                uj_babu = copy.deepcopy(self.futo)
-
-            if uj_babu is None:
-                raise ValueError(
-                    f"Ismeretlen átváltozási bábutípus: {atvaltozott_babu_tipusa}"
-                )
-
-            uj_babu.szin = babuszin
-            uj_babu.koordinatak = [(x, y)]
-
-            # A gyalog helyére kerül az új bábu
-            self.tabla[y][x] = uj_babu
-
-    def lepes_mentes(self, adat_objektum) -> None:
-        self.lepesek.append(adat_objektum)
-
-    def bentvane(self, koordinata) -> bool:
-        x, y = koordinata
-        return 0 <= x <= 7 and 0 <= y <= 7
-
-    def urese(self, koordinata) -> bool:
-        x, y = koordinata
-        return self.tabla[y][x].nev == "nincs"
+            case LepesTipus.ATVALTOZAS_UTESSEL:
+                szin = self.mezo_lekerdezese(lepes.hova).szin
+                self.mezo_beallitasa(lepes.hova, lepes.levett_babu)
+                gyalog = copy.deepcopy(self.gyalog)
+                gyalog.szin = szin
+                self.mezo_beallitasa(lepes.honnan, gyalog)
 
     def tablakiirat(self) -> None:
-        # Unicode sakkfigurák (mindegyik pontosan 1 karakter széles)
         szotar = {
             "Gyalog": {"Fehér": "♙", "Fekete": "♟"},
             "Bástya": {"Fehér": "♖", "Fekete": "♜"},
@@ -209,24 +227,22 @@ class Tabla:
             "nincs": {"Fehér": " ", "Fekete": " "},
         }
 
-        # ANSI színkódok a terminálhoz
-        FEKETE_SZIN = "\033[93m"  # Élénksárga/Arany a sötét bábuknak, hogy jól látszódjanak a fekete háttéren
-        ALAP_SZIN = "\033[0m"  # Színezés alaphelyzetbe állítása
+        FEKETE_SZIN = "\033[93m"
+        ALAP_SZIN = "\033[0m"
 
         elvalaszto = "  +" + "---+" * 8
         print(elvalaszto)
 
-        for idx, j in enumerate(self.tabla):
+        for idx, sor in enumerate(self.tabla):
             sor_szam = len(self.tabla) - idx
             sor_szoveg = f"{sor_szam} |"
 
-            for i in j:
-                if i.nev == "nincs":
+            for mezo in sor:
+                if mezo.nev == "nincs":
                     sor_szoveg += "   |"
                 else:
-                    babu = szotar[i.nev][i.szin]
-                    if i.szin == "Fekete":
-                        # Csak a karaktert színezzük ki, a szóközök mérete változatlan marad
+                    babu = szotar[mezo.nev][mezo.szin]
+                    if mezo.szin == "Fekete":
                         sor_szoveg += f" {FEKETE_SZIN}{babu}{ALAP_SZIN} |"
                     else:
                         sor_szoveg += f" {babu} |"
