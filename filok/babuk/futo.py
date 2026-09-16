@@ -1,8 +1,8 @@
 from filok.babuk.babu import Babu
 from filok.dataclassok.lepestipusok import Pozicio
 
-class Futo(Babu):
 
+class Futo(Babu):
     def __init__(self) -> None:
         super().__init__(nev="Futó")
 

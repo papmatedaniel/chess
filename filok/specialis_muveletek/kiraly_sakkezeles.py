@@ -3,7 +3,6 @@ from filok.dataclassok.lepestipusok import Pozicio
 
 
 class Sakkkezeles:
-
     def __init__(self, tabla, babu, szin: str) -> None:
         self.tabla = tabla
         self.babu = babu
@@ -60,8 +59,8 @@ class Sakkkezeles:
         )
         nagylista.extend(lovak)
 
-        for elem_pos in nagylista:
-            tamado_babu = self.tabla.mezo_lekerdezese(elem_pos)
+        for elem_poz in nagylista:
+            tamado_babu = self.tabla.mezo_lekerdezese(elem_poz)
             kozos: list[Pozicio] = []
             kozos.extend(self.lebont(tamado_babu.utes()))
             kozos.extend(self.lebont(tamado_babu.lepes()))

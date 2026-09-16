@@ -5,7 +5,6 @@ from filok.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 
 
 class Tabla:
-
     def __init__(self, *, mezo, gyalog, huszar, futo, bastya, vezer, kiraly) -> None:
         self.mezo = mezo
         self.gyalog = gyalog
@@ -122,7 +121,9 @@ class Tabla:
         self.mezo_beallitasa(hova, babu)
         self._uresit_mezo(honnan)
 
-    def _uj_babu_letrehozasa(self, pozicio: Pozicio, babutipus: str | None, szin: str) -> None:
+    def _uj_babu_letrehozasa(
+        self, pozicio: Pozicio, babutipus: str | None, szin: str
+    ) -> None:
         uj_babu = None
         if babutipus == "Vezér":
             uj_babu = copy.deepcopy(self.vezer)

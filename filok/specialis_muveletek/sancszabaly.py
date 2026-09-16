@@ -4,28 +4,22 @@ from filok.dataclassok.sanc import Sanc
 
 
 class SancSzabaly:
-
-    def __init__(self, tabla, lepestipusok, sanc, szin, sakkezeles) -> None:
+    def __init__(self, tabla, sanc, szin, sakkezeles) -> None:
         self.tabla = tabla
         self.sanc = sanc
         self.szin = szin
         self.sor = Sanc.szinek[self.szin]
         self.sakkezeles = sakkezeles
 
-    def kettokozottikoordinatak(
-        self, egy: Pozicio, ketto: Pozicio
-    ) -> list[Pozicio]:
+    def kettokozottikoordinatak(self, egy: Pozicio, ketto: Pozicio) -> list[Pozicio]:
         """A király és bástya közötti üresnek kötelező mezők listája."""
         sor = egy.sor
         oszlop1, oszlop2 = sorted([egy.oszlop, ketto.oszlop])
-        return [
-            Pozicio(sor=sor, oszlop=i)
-            for i in range(oszlop1 + 1, oszlop2)
-        ]
+        return [Pozicio(sor=sor, oszlop=i) for i in range(oszlop1 + 1, oszlop2)]
 
     def teruletszabad(self, poziciok: list[Pozicio]) -> bool:
         """Megadja, hogy az adott mezők mindegyike üres-e."""
-        return all(self.tabla.urese(pos) for pos in poziciok)
+        return all(self.tabla.urese(poz) for poz in poziciok)
 
     def sanc_lephet_e(self) -> LepesEredmeny:
         if self.sanc not in ["0-0", "0-0-0"]:
@@ -34,11 +28,11 @@ class SancSzabaly:
         kiraly_oszlop = Sanc.kiraly_honnan
         bastya_oszlop = Sanc.sancvalaszto[self.sanc]["bastya_honnan"]
 
-        kiraly_pos = Pozicio(sor=self.sor, oszlop=kiraly_oszlop)
-        bastya_pos = Pozicio(sor=self.sor, oszlop=bastya_oszlop)
+        kiraly_poz = Pozicio(sor=self.sor, oszlop=kiraly_oszlop)
+        bastya_poz = Pozicio(sor=self.sor, oszlop=bastya_oszlop)
 
-        kiraly = self.tabla.mezo_lekerdezese(kiraly_pos)
-        bastya = self.tabla.mezo_lekerdezese(bastya_pos)
+        kiraly = self.tabla.mezo_lekerdezese(kiraly_poz)
+        bastya = self.tabla.mezo_lekerdezese(bastya_poz)
 
         if kiraly.nev != "Király" or bastya.nev != "Bástya":
             return LepesEredmeny(False, "Hiányzó bábu", None)
@@ -46,7 +40,7 @@ class SancSzabaly:
         if len(kiraly.koordinatak) != 1 or len(bastya.koordinatak) != 1:
             return LepesEredmeny(False, "Korábbi lépés miatt nem sáncolhatsz", None)
 
-        kettokozott = self.kettokozottikoordinatak(kiraly_pos, bastya_pos)
+        kettokozott = self.kettokozottikoordinatak(kiraly_poz, bastya_poz)
         if not self.teruletszabad(kettokozott):
             return LepesEredmeny(False, "Útban van más bábu", None)
 
@@ -55,12 +49,12 @@ class SancSzabaly:
         lepes_irany = 1 if kiraly_cel_oszlop > kiraly_oszlop else -1
 
         kiraly_utvonala = [
-            kiraly_pos,
+            kiraly_poz,
             Pozicio(sor=self.sor, oszlop=kiraly_oszlop + lepes_irany),
             Pozicio(sor=self.sor, oszlop=kiraly_cel_oszlop),
         ]
 
-        if any(self.sakkezeles.kiraly_sakkban_vane(pos) for pos in kiraly_utvonala):
+        if any(self.sakkezeles.kiraly_sakkban_vane(poz) for poz in kiraly_utvonala):
             return LepesEredmeny(False, "Támadott a király/mozgástere", None)
 
         return LepesEredmeny(True, "Sáncolás végrehajtható", None)

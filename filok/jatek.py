@@ -47,20 +47,22 @@ class Jatek:
         szinek = ["Fehér", "Fekete"]
 
         while True:
-            print(szinek[0])
+            soron_kovetkezo = szinek[0]
+            print(soron_kovetkezo)
             try:
                 self.tablaobj.tablakiirat()
                 bemenet = input("Add meg a koordinátákat(honnan hová): a2 a3: ").lower()
 
                 try:
-                    honnan_pos, hova_pos = self.koordinata_beker(bemenet)
+                    honnan_poz, hova_poz = self.koordinata_beker(bemenet)
 
                     # 1. BabuSzabaly példányosítás
-                    szabaly = BabuSzabaly(Altalanosszabalyok())
+                    gyalog_szabaly = Gyaloglepes(Altalanosszabalyok())
+                    szabaly = BabuSzabaly(Altalanosszabalyok(), gyalog_szabaly)
 
                     # 2. Általános ellenőrzés Pozicio típusokkal
                     ellenorzes = szabaly.lepes_ellenorzo(
-                        self.tablaobj, honnan_pos, szinek[0], hova_pos
+                        self.tablaobj, honnan_poz, soron_kovetkezo, hova_poz
                     )
                     print(ellenorzes.uzenet)
 
@@ -68,12 +70,12 @@ class Jatek:
                         continue
 
                     # 3. Bábuspecifikus ellenőrzés
-                    babu = self.tablaobj.mezo_lekerdezese(honnan_pos)
-                    gyalog = Gyaloglepes(Altalanosszabalyok())
+                    babu = self.tablaobj.mezo_lekerdezese(honnan_poz)
 
                     vegrehajtas = szabaly.babu_valaszto(
-                        self.tablaobj, babu, gyalog, honnan_pos, hova_pos
+                        self.tablaobj, babu, honnan_poz, hova_poz
                     )
+                    print(szabaly.elerheto_mezok_lekerese(self.tablaobj, babu))
                     print(vegrehajtas.uzenet)
 
                     # 4. Ha szabályos → végrehajtás
@@ -86,10 +88,11 @@ class Jatek:
                     try:
                         szabaly2 = SancSzabaly(
                             self.tablaobj,
-                            self.lepestipusok,
                             bemenet,
-                            szinek[0],
-                            Sakkkezeles(self.tablaobj, Altalanosszabalyok(), szinek[0]),
+                            soron_kovetkezo,
+                            Sakkkezeles(
+                                self.tablaobj, Altalanosszabalyok(), soron_kovetkezo
+                            ),
                         )
 
                         # 5/a. Sánc ellenőrzés

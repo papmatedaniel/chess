@@ -2,43 +2,36 @@ from filok.dataclassok.lepestipusok import Pozicio
 
 
 class Altalanosszabalyok:
-
-    def hova_lephet(
-        self, tabla, poziciok: list[Pozicio]
-    ) -> list[Pozicio]:
+    def hova_lephet(self, tabla, poziciok: list[Pozicio]) -> list[Pozicio]:
         jo_poziciok: list[Pozicio] = []
 
-        for pos in poziciok:
-            if tabla.bentvane(pos) and tabla.urese(pos):
-                jo_poziciok.append(pos)
+        for poz in poziciok:
+            if tabla.bentvane(poz) and tabla.urese(poz):
+                jo_poziciok.append(poz)
 
         return jo_poziciok
 
-    def hova_uthet(
-        self, tabla, poziciok: list[Pozicio], szin: str
-    ) -> list[Pozicio]:
+    def hova_uthet(self, tabla, poziciok: list[Pozicio], szin: str) -> list[Pozicio]:
         jo_poziciok: list[Pozicio] = []
 
-        for pos in poziciok:
+        for poz in poziciok:
             if (
-                tabla.bentvane(pos)
-                and not tabla.urese(pos)
-                and tabla.mezo_lekerdezese(pos).szin != szin
+                tabla.bentvane(poz)
+                and not tabla.urese(poz)
+                and tabla.mezo_lekerdezese(poz).szin != szin
             ):
-                jo_poziciok.append(pos)
+                jo_poziciok.append(poz)
 
         return jo_poziciok
 
-    def hova_lephet_sor(
-        self, tabla, iranyok: list[list[Pozicio]]
-    ) -> list[Pozicio]:
+    def hova_lephet_sor(self, tabla, iranyok: list[list[Pozicio]]) -> list[Pozicio]:
         """Egyenes lépéssorozat üres mezőkre: bástya, futó, vezér."""
         jo_poziciok: list[Pozicio] = []
 
         for irany in iranyok:
-            for pos in irany:
-                if tabla.bentvane(pos) and tabla.urese(pos):
-                    jo_poziciok.append(pos)
+            for poz in irany:
+                if tabla.bentvane(poz) and tabla.urese(poz):
+                    jo_poziciok.append(poz)
                 else:
                     break
 
@@ -51,14 +44,14 @@ class Altalanosszabalyok:
         jo_poziciok: list[Pozicio] = []
 
         for irany in iranyok:
-            for pos in irany:
-                if not tabla.bentvane(pos):
+            for poz in irany:
+                if not tabla.bentvane(poz):
                     break
 
-                if not tabla.urese(pos):
-                    cel_babu = tabla.mezo_lekerdezese(pos)
+                if not tabla.urese(poz):
+                    cel_babu = tabla.mezo_lekerdezese(poz)
                     if cel_babu.szin != szin:
-                        jo_poziciok.append(pos)
+                        jo_poziciok.append(poz)
                     # Ha bármilyen bábu áll az úton (akár saját, akár ellenség), a sugár megtörik
                     break
 

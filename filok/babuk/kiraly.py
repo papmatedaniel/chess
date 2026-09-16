@@ -3,7 +3,6 @@ from filok.dataclassok.lepestipusok import Pozicio
 
 
 class Kiraly(Babu):
-
     def __init__(self) -> None:
         super().__init__(nev="Király")
 

@@ -26,27 +26,27 @@ class Gyaloglepes:
         if utolso_babu.nev != "Gyalog":
             return alap_valasz
 
-        pos1 = utolso.hova
-        pos2 = babu.utolsokoord
+        poz1 = utolso.hova
+        poz2 = babu.utolsokoord
 
         if not self.gyalog_duplalepese(utolso_babu.koordinatak):
             return alap_valasz
 
-        # Csak közvetlenül egymás mellett álló gyalogok esetén lehetséges
-        if pos2.sor != pos1.sor or abs(pos2.oszlop - pos1.oszlop) != 1:
+        # csak egymás mellett álló gyalogoknál
+        if poz2.sor != poz1.sor or abs(poz2.oszlop - poz1.oszlop) != 1:
             return alap_valasz
 
         jo_koordinatak: list[Pozicio] = []
         leveheto_koordinata: Pozicio | None = None
 
-        for cel_pos in babu.utes():
+        for cel_poz in babu.utes():
             if (
-                tabla.bentvane(cel_pos)
-                and tabla.urese(cel_pos)
-                and cel_pos.oszlop == pos1.oszlop
+                tabla.bentvane(cel_poz)
+                and tabla.urese(cel_poz)
+                and cel_poz.oszlop == poz1.oszlop
             ):
                 leveheto_koordinata = utolso.hova
-                jo_koordinatak.append(cel_pos)
+                jo_koordinatak.append(cel_poz)
 
         return {
             "vegkoordinata": jo_koordinatak,
@@ -54,16 +54,15 @@ class Gyaloglepes:
         }
 
     def gyalog_hova_lephet(self, tabla, babu) -> list[Pozicio]:
-        # Ha a kezdő mezőjén van és az 1 mezős előrelépés szabad
+        # ha elotte allo mezo ures, duplalepest probalunk
         szabad_egyes = self.altalanosszabalyok.hova_lephet(tabla, babu.lepes())
         if len(babu.koordinatak) == 1 and len(szabad_egyes) == 1:
-            # Csak a szabad mezőket engedélyezzük a dupla lépésnél is
             return self.altalanosszabalyok.hova_lephet(tabla, babu.elso_lepes())
 
         return szabad_egyes
 
     def gyalog_atvaltozhat_e(self, babu) -> bool:
-        # Fehér a sor == 0, Fekete a sor == 7 alapsorra érve változik át
+        # (fehérsor=0, feketesor=7) alapsorra érve változik át
         cel_sor = 0 if babu.szin == "Fehér" else 7
         # Ha a következő lépésével eléri a túloldalt
         kovetkezo_sor = babu.utolsokoord.sor + babu.szinek[babu.szin]
