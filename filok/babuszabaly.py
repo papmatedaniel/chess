@@ -3,11 +3,62 @@ from filok.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 
 
 class BabuSzabaly:
-    def __init__(
-        self,
-        altalanosszabalyok,
-    ) -> None:
+    def __init__(self, altalanosszabalyok, gyalogszabalyok) -> None:
         self.altalanosszabalyok = altalanosszabalyok
+        self.gyalog = gyalogszabalyok
+
+        self.szabaly_generatorok = {
+            "Gyalog": self.gyalog_generator,
+            "Huszár": lambda tabla, babu: {
+                "lephet": self.altalanosszabalyok.hova_lephet(tabla, babu.lepes()),
+                "uthet": self.altalanosszabalyok.hova_uthet(
+                    tabla, babu.utes(), babu.szin
+                ),
+            },
+            "Futó": lambda tabla, babu: {
+                "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
+                "uthet": self.altalanosszabalyok.hova_uthet_sor(
+                    tabla, babu.utes(), babu.szin
+                ),
+            },
+            "Bástya": lambda tabla, babu: {
+                "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
+                "uthet": self.altalanosszabalyok.hova_uthet_sor(
+                    tabla, babu.utes(), babu.szin
+                ),
+            },
+            "Vezér": lambda tabla, babu: {
+                "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
+                "uthet": self.altalanosszabalyok.hova_uthet_sor(
+                    tabla, babu.utes(), babu.szin
+                ),
+            },
+            "Király": lambda tabla, babu: {
+                "lephet": self.altalanosszabalyok.hova_lephet(tabla, babu.lepes()),
+                "uthet": self.altalanosszabalyok.hova_uthet(
+                    tabla, babu.utes(), babu.szin
+                ),
+            },
+        }
+
+    def gyalog_generator(self, tabla, babu) -> dict:
+        atvaltozas = (
+            self.gyalog.gyalog_atvaltozas()
+            if self.gyalog.gyalog_atvaltozhat_e(babu)
+            else None
+        )
+        return {
+            "lephet": self.gyalog.gyalog_hova_lephet(tabla, babu),
+            "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
+            "enpassant": self.gyalog.gyalog_hova_lephet_enpassant(tabla, babu),
+            "atvaltozas": atvaltozas,
+        }
+
+    def elerheto_mezok_lekerese(self, tabla, babu) -> dict:
+        generator = self.szabaly_generatorok.get(babu.nev)
+        if not generator:
+            return {"lephet": [], "uthet": []}
+        return generator(tabla, babu)
 
     def lepes_ellenorzo(
         self,
@@ -35,42 +86,27 @@ class BabuSzabaly:
         self,
         tabla,
         babu,
-        gyalog,
         kezdopozicio: Pozicio,
         vegpozicio: Pozicio,
     ) -> LepesEredmeny:
-        match babu.nev:
-            case "Gyalog":
-                return self.gyalog_lepes_ellenorzo(
-                    tabla, babu, gyalog, kezdopozicio, vegpozicio
-                )
-            case "Huszár":
-                return self.huszar_lepes_ellenorzo(
-                    tabla, babu, kezdopozicio, vegpozicio
-                )
-            case "Futó":
-                return self.futo_lepes_ellenorzo(
-                    tabla, babu, kezdopozicio, vegpozicio
-                )
-            case "Bástya":
-                return self.bastya_lepes_ellenorzo(
-                    tabla, babu, kezdopozicio, vegpozicio
-                )
-            case "Vezér":
-                return self.vezer_lepes_ellenorzo(
-                    tabla, babu, kezdopozicio, vegpozicio
-                )
-            case "Király":
-                return self.kiraly_lepes_ellenorzo(
-                    tabla, babu, kezdopozicio, vegpozicio
-                )
-            case _:
-                return LepesEredmeny(False, "Nincs ilyen bábu", None)
+        if babu.nev not in self.szabaly_generatorok:
+            return LepesEredmeny(False, "Nincs ilyen bábu", None)
+
+        adatok = self.szabaly_generatorok[babu.nev](tabla, babu)
+
+        return self.altalanos_lepes_ellenorzo(
+            tabla=tabla,
+            kezdopozicio=kezdopozicio,
+            vegpozicio=vegpozicio,
+            lephet=adatok.get("lephet", []),
+            uthet=adatok.get("uthet", []),
+            enpassant=adatok.get("enpassant"),
+            atvaltozott_babu_tipusa=adatok.get("atvaltozas"),
+        )
 
     def altalanos_lepes_ellenorzo(
         self,
         tabla,
-        babu,
         kezdopozicio: Pozicio,
         vegpozicio: Pozicio,
         lephet: list[Pozicio],
@@ -78,12 +114,10 @@ class BabuSzabaly:
         enpassant: dict | None = None,
         atvaltozott_babu_tipusa: str | None = None,
     ) -> LepesEredmeny:
-        # 1. Lépés üres mezőre (sima vagy gyalogátváltozás)
+        # 1. Lépés üres mezőre
         if vegpozicio in lephet:
             tipus = (
-                LepesTipus.ATVALTOZAS
-                if atvaltozott_babu_tipusa
-                else LepesTipus.SIMA
+                LepesTipus.ATVALTOZAS if atvaltozott_babu_tipusa else LepesTipus.SIMA
             )
             lepes = Lepes(
                 tipus=tipus,
@@ -93,7 +127,7 @@ class BabuSzabaly:
             )
             return LepesEredmeny(True, "Lépés végrehajtható", lepes)
 
-        # 2. Ütés (sima ütés vagy ütéssel egybekötött átváltozás)
+        # 2. Ütés
         if vegpozicio in uthet:
             tipus = (
                 LepesTipus.ATVALTOZAS_UTESSEL
@@ -126,75 +160,4 @@ class BabuSzabaly:
             False,
             "A célkoordináta nem egyezik a bábu szabályos lépésével",
             None,
-        )
-
-    def gyalog_lepes_ellenorzo(
-        self, tabla, babu, gyalog, kezdopozicio: Pozicio, vegpozicio: Pozicio
-    ) -> LepesEredmeny:
-        lephet = gyalog.gyalog_hova_lephet(tabla, babu)
-        uthet = self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin)
-        enpassant = gyalog.gyalog_hova_lephet_enpassant(tabla, babu)
-        atvaltozott_babu_tipusa = None
-        if gyalog.gyalog_atvaltozhat_e(babu):
-            atvaltozott_babu_tipusa = gyalog.gyalog_atvaltozas()
-
-        return self.altalanos_lepes_ellenorzo(
-            tabla,
-            babu,
-            kezdopozicio,
-            vegpozicio,
-            lephet,
-            uthet,
-            enpassant,
-            atvaltozott_babu_tipusa,
-        )
-
-    def huszar_lepes_ellenorzo(
-        self, tabla, babu, kezdopozicio: Pozicio, vegpozicio: Pozicio
-    ) -> LepesEredmeny:
-        lephet = self.altalanosszabalyok.hova_lephet(tabla, babu.lepes())
-        uthet = self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin)
-
-        return self.altalanos_lepes_ellenorzo(
-            tabla, babu, kezdopozicio, vegpozicio, lephet, uthet, None
-        )
-
-    def bastya_lepes_ellenorzo(
-        self, tabla, babu, kezdopozicio: Pozicio, vegpozicio: Pozicio
-    ) -> LepesEredmeny:
-        lephet = self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes())
-        uthet = self.altalanosszabalyok.hova_uthet_sor(tabla, babu.utes(), babu.szin)
-
-        return self.altalanos_lepes_ellenorzo(
-            tabla, babu, kezdopozicio, vegpozicio, lephet, uthet, None
-        )
-
-    def futo_lepes_ellenorzo(
-        self, tabla, babu, kezdopozicio: Pozicio, vegpozicio: Pozicio
-    ) -> LepesEredmeny:
-        lephet = self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes())
-        uthet = self.altalanosszabalyok.hova_uthet_sor(tabla, babu.utes(), babu.szin)
-
-        return self.altalanos_lepes_ellenorzo(
-            tabla, babu, kezdopozicio, vegpozicio, lephet, uthet, None
-        )
-
-    def vezer_lepes_ellenorzo(
-        self, tabla, babu, kezdopozicio: Pozicio, vegpozicio: Pozicio
-    ) -> LepesEredmeny:
-        lephet = self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes())
-        uthet = self.altalanosszabalyok.hova_uthet_sor(tabla, babu.utes(), babu.szin)
-
-        return self.altalanos_lepes_ellenorzo(
-            tabla, babu, kezdopozicio, vegpozicio, lephet, uthet, None
-        )
-
-    def kiraly_lepes_ellenorzo(
-        self, tabla, babu, kezdopozicio: Pozicio, vegpozicio: Pozicio
-    ) -> LepesEredmeny:
-        lephet = self.altalanosszabalyok.hova_lephet(tabla, babu.lepes())
-        uthet = self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin)
-
-        return self.altalanos_lepes_ellenorzo(
-            tabla, babu, kezdopozicio, vegpozicio, lephet, uthet, None
         )
