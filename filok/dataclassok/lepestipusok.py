@@ -13,6 +13,20 @@ class Pozicio:
         """Ellenőrzi, hogy a pozíció a 8x8-as sakktáblán belül van-e."""
         return 0 <= self.sor < 8 and 0 <= self.oszlop < 8
 
+    @property
+    def valos(self) -> str:
+        """Visszaadja a standard algebrai sakk-koordinátát (pl. 'e4')."""
+        if not self.palyan_van():
+            return f"?({self.sor}, {self.oszlop})"
+
+        oszlop_betu = chr(ord("a") + self.oszlop)
+        sor_szam = str(8 - self.sor)
+        return f"{oszlop_betu}{sor_szam}"
+
+    def __repr__(self) -> str:
+        # Debugoláskor vagy print-nél rögtön mutatja mindkét formátumot
+        return f"{self.valos}"
+
 
 class LepesTipus(Enum):
     SIMA = auto()  # Normál lépés üres mezőre
