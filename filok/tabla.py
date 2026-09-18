@@ -108,7 +108,7 @@ class Tabla:
 
     def mezo_beallitasa(self, pozicio: Pozicio, babu: Any) -> None:
         self.tabla[pozicio.sor][pozicio.oszlop] = babu
-        if hasattr(babu, "koordinatak"):
+        if hasattr(babu, "koordinatak") and babu.koordinatak[-1] != pozicio:
             babu.koordinatak.append(pozicio)
 
     def _uresit_mezo(self, pozicio: Pozicio) -> None:
@@ -178,6 +178,17 @@ class Tabla:
 
         self.lepesek.append(lepes)
 
+    def _visszamozgat_babu(self, honnan_most: Pozicio, hova_vissza: Pozicio) -> None:
+        """Bábu visszamozgatása az előző helyére anélkül, hogy torzulna a lépéstörténete."""
+        babu = self.mezo_lekerdezese(honnan_most)
+
+        # Levágjuk a legutóbbi lépést, hogy a kezdeti állapot (pl. duplalépés joga) helyreálljon
+        if len(babu.koordinatak) > 1:
+            babu.koordinatak.pop()
+
+        self.mezo_beallitasa(hova_vissza, babu)
+        self._uresit_mezo(honnan_most)
+
     def lepes_visszavonas(self) -> None:
         """A legutolsó lépés visszavonása."""
         if not self.lepesek:
@@ -187,20 +198,20 @@ class Tabla:
 
         match lepes.tipus:
             case LepesTipus.SIMA:
-                self._mozgat_babu(lepes.hova, lepes.honnan)
+                self._visszamozgat_babu(lepes.hova, lepes.honnan)
 
             case LepesTipus.UTES:
-                self._mozgat_babu(lepes.hova, lepes.honnan)
+                self._visszamozgat_babu(lepes.hova, lepes.honnan)
                 self.mezo_beallitasa(lepes.hova, lepes.levett_babu)
 
             case LepesTipus.SANC:
                 assert lepes.bastya_honnan is not None and lepes.bastya_hova is not None
-                self._mozgat_babu(lepes.hova, lepes.honnan)
-                self._mozgat_babu(lepes.bastya_hova, lepes.bastya_honnan)
+                self._visszamozgat_babu(lepes.hova, lepes.honnan)
+                self._visszamozgat_babu(lepes.bastya_hova, lepes.bastya_honnan)
 
             case LepesTipus.EN_PASSANT:
                 assert lepes.levett_babu_pozicio is not None
-                self._mozgat_babu(lepes.hova, lepes.honnan)
+                self._visszamozgat_babu(lepes.hova, lepes.honnan)
                 self.mezo_beallitasa(lepes.levett_babu_pozicio, lepes.levett_babu)
 
             case LepesTipus.ATVALTOZAS:
@@ -208,6 +219,7 @@ class Tabla:
                 self._uresit_mezo(lepes.hova)
                 gyalog = copy.deepcopy(self.gyalog)
                 gyalog.szin = szin
+                gyalog.koordinatak = [lepes.honnan]
                 self.mezo_beallitasa(lepes.honnan, gyalog)
 
             case LepesTipus.ATVALTOZAS_UTESSEL:
@@ -215,6 +227,7 @@ class Tabla:
                 self.mezo_beallitasa(lepes.hova, lepes.levett_babu)
                 gyalog = copy.deepcopy(self.gyalog)
                 gyalog.szin = szin
+                gyalog.koordinatak = [lepes.honnan]
                 self.mezo_beallitasa(lepes.honnan, gyalog)
 
     def tablakiirat(self) -> None:
