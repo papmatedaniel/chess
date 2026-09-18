@@ -6,6 +6,7 @@ class BabuSzabaly:
     def __init__(self, altalanosszabalyok, gyalogszabalyok) -> None:
         self.altalanosszabalyok = altalanosszabalyok
         self.gyalog = gyalogszabalyok
+        self.szimulacio = False
 
         self.szabaly_generatorok = {
             "Gyalog": self.gyalog_generator,
@@ -41,12 +42,27 @@ class BabuSzabaly:
             },
         }
 
-    def gyalog_generator(self, tabla, babu) -> dict:
-        atvaltozas = (
-            self.gyalog.gyalog_atvaltozas()
-            if self.gyalog.gyalog_atvaltozhat_e(babu)
-            else None
-        )
+    def szimilacio_kapcsolo(self) -> None:
+        if self.szimulacio == False:
+            self.szimulacio = True
+        else:
+            self.szimulacio = False
+
+    def gyalog_generator(
+        self,
+        tabla,
+        babu,
+    ) -> dict:
+
+        if self.gyalog.gyalog_atvaltozhat_e(babu):
+            if self.szimulacio:
+                atvaltozas = self.gyalog.gyalog_atvaltozas("Szimuláció")
+                self.szimilacio_kapcsolo()
+            else:
+                atvaltozas = self.gyalog.gyalog_atvaltozas()
+        else:
+            atvaltozas = None
+
         return {
             "lephet": self.gyalog.gyalog_hova_lephet(tabla, babu),
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
@@ -83,17 +99,12 @@ class BabuSzabaly:
         return LepesEredmeny(True, "Minden feltétel megfelel", None)
 
     def babu_valaszto(
-        self,
-        tabla,
-        babu,
-        kezdopozicio: Pozicio,
-        vegpozicio: Pozicio,
+        self, tabla, babu, kezdopozicio: Pozicio, vegpozicio: Pozicio
     ) -> LepesEredmeny:
         if babu.nev not in self.szabaly_generatorok:
             return LepesEredmeny(False, "Nincs ilyen bábu", None)
 
         adatok = self.szabaly_generatorok[babu.nev](tabla, babu)
-
         return self.altalanos_lepes_ellenorzo(
             tabla=tabla,
             kezdopozicio=kezdopozicio,

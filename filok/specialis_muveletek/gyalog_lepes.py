@@ -68,10 +68,12 @@ class Gyaloglepes:
         kovetkezo_sor = babu.utolsokoord.sor + babu.szinek[babu.szin]
         return kovetkezo_sor == cel_sor
 
-    def gyalog_atvaltozas(self) -> str:
+    def gyalog_atvaltozas(self, szimulacio=None) -> str:
         szotar = {"v": "Vezér", "b": "Bástya", "h": "Huszár", "f": "Futó"}
+        if not szimulacio is None:
+            return szotar["v"]
         while True:
-            bemenet = input("Milyen bábuvá változnál?(V, B, H, F): ").lower()
+            bemenet = input("Milyen bábuvá változnál?(V, B, H, F): ").strip().lower()
             if bemenet in szotar:
                 return szotar[bemenet]
             print("Hibás bábutípus! Választható: V, B, H, F")
