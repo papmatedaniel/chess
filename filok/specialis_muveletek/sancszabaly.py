@@ -22,7 +22,7 @@ class SancSzabaly:
 
     def sanc_lephet_e(self, sanc) -> LepesEredmeny:
         if sanc not in ["0-0", "0-0-0"]:
-            return LepesEredmeny(False, "Nem létező sánc típus", None)
+            return LepesEredmeny(False, "Nem létező sánc típus")
 
         kiraly_oszlop = Sanc.kiraly_honnan
         bastya_oszlop = Sanc.sancvalaszto[sanc]["bastya_honnan"]
@@ -34,14 +34,14 @@ class SancSzabaly:
         bastya = self.tabla.mezo_lekerdezese(bastya_poz)
 
         if kiraly.nev != "Király" or bastya.nev != "Bástya":
-            return LepesEredmeny(False, "Hiányzó bábu", None)
+            return LepesEredmeny(False, "Hiányzó bábu")
 
         if len(kiraly.koordinatak) != 1 or len(bastya.koordinatak) != 1:
-            return LepesEredmeny(False, "Korábbi lépés miatt nem sáncolhatsz", None)
+            return LepesEredmeny(False, "Korábbi lépés miatt nem sáncolhatsz")
 
         kettokozott = self.kettokozottikoordinatak(kiraly_poz, bastya_poz)
         if not self.teruletszabad(kettokozott):
-            return LepesEredmeny(False, "Útban van más bábu", None)
+            return LepesEredmeny(False, "Útban van más bábu")
 
         # A király által érintett mezők ellenőrzése (kezdő, áthaladó, érkező mező nem lehet sakkban)
         kiraly_cel_oszlop = Sanc.sancvalaszto[sanc]["kiraly_hova"]
@@ -57,9 +57,9 @@ class SancSzabaly:
             self.sakkezeles.kiraly_sakkban_vane(poz, self.szin)
             for poz in kiraly_utvonala
         ):
-            return LepesEredmeny(False, "Támadott a király/mozgástere", None)
+            return LepesEredmeny(False, "Támadott a király/mozgástere")
 
-        return LepesEredmeny(True, "Sáncolás végrehajtható", None)
+        return LepesEredmeny(True, "Sáncolás végrehajtható")
 
     def sanc_koordinatak(self, sanc) -> tuple[Pozicio, Pozicio, Pozicio, Pozicio]:
         kiraly_honnan = Pozicio(sor=self.sor, oszlop=Sanc.kiraly_honnan)

@@ -18,76 +18,40 @@ class Tabla:
         self.lepesek: list[Lepes] = []
 
     def tablageneralas(self) -> None:
-        """Teljes sakk kezdőállás legenerálása."""
+        """Teljes sakk kezdőállás legenerálása deklaratív sablon alapján."""
+        tiszt_sablon = [
+            self.bastya,
+            self.huszar,
+            self.futo,
+            self.vezer,
+            self.kiraly,
+            self.futo,
+            self.huszar,
+            self.bastya,
+        ]
+
         for y in range(8):
             sor = []
             for x in range(8):
                 poz = Pozicio(sor=y, oszlop=x)
 
-                # Üres mező alapértelmezésben
-                uj_mezo = copy.deepcopy(self.mezo)
-                uj_mezo.koordinatak[-1] = poz
-
-                # --- FEKETE FŐBÁBUK (y == 0) ---
-                if y == 0:
-                    if x in (0, 7):
-                        babu = copy.deepcopy(self.bastya)
-                    elif x in (1, 6):
-                        babu = copy.deepcopy(self.huszar)
-                    elif x in (2, 5):
-                        babu = copy.deepcopy(self.futo)
-                    elif x == 3:
-                        babu = copy.deepcopy(self.vezer)
-                    elif x == 4:
-                        babu = copy.deepcopy(self.kiraly)
-                    else:
-                        sor.append(uj_mezo)
-                        continue
-
+                if y == 0:  # Fekete tisztek
+                    babu = copy.deepcopy(tiszt_sablon[x])
                     babu.szin = "Fekete"
-                    babu.koordinatak[-1] = poz
-                    sor.append(babu)
-                    continue
-
-                # --- FEKETE GYALOGOK (y == 1) ---
-                if y == 1:
+                elif y == 1:  # Fekete gyalogok
                     babu = copy.deepcopy(self.gyalog)
                     babu.szin = "Fekete"
-                    babu.koordinatak[-1] = poz
-                    sor.append(babu)
-                    continue
-
-                # --- FEHÉR GYALOGOK (y == 6) ---
-                if y == 6:
+                elif y == 6:  # Fehér gyalogok
                     babu = copy.deepcopy(self.gyalog)
                     babu.szin = "Fehér"
-                    babu.koordinatak[-1] = poz
-                    sor.append(babu)
-                    continue
-
-                # --- FEHÉR FŐBÁBUK (y == 7) ---
-                if y == 7:
-                    if x in (0, 7):
-                        babu = copy.deepcopy(self.bastya)
-                    elif x in (1, 6):
-                        babu = copy.deepcopy(self.huszar)
-                    elif x in (2, 5):
-                        babu = copy.deepcopy(self.futo)
-                    elif x == 3:
-                        babu = copy.deepcopy(self.vezer)
-                    elif x == 4:
-                        babu = copy.deepcopy(self.kiraly)
-                    else:
-                        sor.append(uj_mezo)
-                        continue
-
+                elif y == 7:  # Fehér tisztek
+                    babu = copy.deepcopy(tiszt_sablon[x])
                     babu.szin = "Fehér"
-                    babu.koordinatak[-1] = poz
-                    sor.append(babu)
-                    continue
+                else:  # Üres mező
+                    babu = copy.deepcopy(self.mezo)
 
-                # --- ÜRES MEZŐ ---
-                sor.append(uj_mezo)
+                babu.koordinatak = [poz]
+                sor.append(babu)
 
             self.tabla.append(sor)
 
@@ -148,11 +112,7 @@ class Tabla:
     def lepes_vegrehajtas(self, lepes: Lepes) -> None:
         """Determinisztikus lépésvégrehajtás a LepesTipus alapján."""
         match lepes.tipus:
-            case LepesTipus.SIMA:
-                self._mozgat_babu(lepes.honnan, lepes.hova)
-
-            case LepesTipus.UTES:
-                self._uresit_mezo(lepes.hova)
+            case LepesTipus.SIMA | LepesTipus.UTES:
                 self._mozgat_babu(lepes.honnan, lepes.hova)
 
             case LepesTipus.SANC:
@@ -172,21 +132,20 @@ class Tabla:
 
             case LepesTipus.ATVALTOZAS_UTESSEL:
                 szin = self.mezo_lekerdezese(lepes.honnan).szin
-                self._uresit_mezo(lepes.hova)
                 self._uresit_mezo(lepes.honnan)
                 self._uj_babu_letrehozasa(lepes.hova, lepes.uj_babu_tipus, szin)
 
         self.lepesek.append(lepes)
 
     def _visszamozgat_babu(self, honnan_most: Pozicio, hova_vissza: Pozicio) -> None:
-        """Bábu visszamozgatása az előző helyére anélkül, hogy torzulna a lépéstörténete."""
+        """Bábu visszamozgatása az előző helyére a történet bővítése nélkül."""
         babu = self.mezo_lekerdezese(honnan_most)
 
-        # Levágjuk a legutóbbi lépést, hogy a kezdeti állapot (pl. duplalépés joga) helyreálljon
         if len(babu.koordinatak) > 1:
             babu.koordinatak.pop()
 
-        self.mezo_beallitasa(hova_vissza, babu)
+        # Közvetlenül a mátrixba írjuk vissza, nem hívunk történet-bővítő settert
+        self.tabla[hova_vissza.sor][hova_vissza.oszlop] = babu
         self._uresit_mezo(honnan_most)
 
     def lepes_visszavonas(self) -> None:

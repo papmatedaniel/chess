@@ -18,12 +18,12 @@ class Szimulacio:
 
     def validlepesek(self, szin) -> dict:
         szotar = {}
+        self.babuszabaly.szimilacio_kapcsolo()
         for sor in self.tabla.tabla:
             for babu in sor:
                 if babu.szin != szin:
                     continue
 
-                self.babuszabaly.szimilacio_kapcsolo()
                 osszes_kordinata = self.babuszabaly.elerheto_mezok_lekerese(
                     self.tabla, babu
                 )
@@ -49,6 +49,8 @@ class Szimulacio:
                         jo_lepesek.append(elem)
                 if len(jo_lepesek) > 0:
                     szotar[babu.utolsokoord] = jo_lepesek
+
+        self.babuszabaly.szimilacio_kapcsolo()
         return szotar
 
     def valid_sancok(self, szin) -> list:
@@ -64,7 +66,11 @@ class Szimulacio:
         return lista
 
     def szimulacio_ertekelo(self, szin) -> dict:
-        osszes_lepes_szama = len(self.validlepesek(szin)) + len(self.valid_sancok(szin))
+        valid_lepesek_szotar = self.validlepesek(szin)
+        valid_sanc_lista = self.valid_sancok(szin)
+        osszes_lepes_szama = sum(
+            len(hova) for hova in valid_lepesek_szotar.values()
+        ) + len(valid_sanc_lista)
         jatekmehettovabb = osszes_lepes_szama > 0
 
         allapot = "mehettovabb"
@@ -76,6 +82,8 @@ class Szimulacio:
 
         return {
             "szabalyos_lepesek_szama": osszes_lepes_szama,
+            "lepesek": valid_lepesek_szotar,
+            "sancok": valid_sanc_lista,
             "allapot": allapot,
             "jatekmehettovabb": jatekmehettovabb,
         }

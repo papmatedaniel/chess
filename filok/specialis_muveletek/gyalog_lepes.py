@@ -65,15 +65,5 @@ class Gyaloglepes:
         # (fehérsor=0, feketesor=7) alapsorra érve változik át
         cel_sor = 0 if babu.szin == "Fehér" else 7
         # Ha a következő lépésével eléri a túloldalt
-        kovetkezo_sor = babu.utolsokoord.sor + babu.szinek[babu.szin]
+        kovetkezo_sor = babu.utolsokoord.sor + babu.gyalog_irany[babu.szin]
         return kovetkezo_sor == cel_sor
-
-    def gyalog_atvaltozas(self, szimulacio=None) -> str:
-        szotar = {"v": "Vezér", "b": "Bástya", "h": "Huszár", "f": "Futó"}
-        if not szimulacio is None:
-            return szotar["v"]
-        while True:
-            bemenet = input("Milyen bábuvá változnál?(V, B, H, F): ").strip().lower()
-            if bemenet in szotar:
-                return szotar[bemenet]
-            print("Hibás bábutípus! Választható: V, B, H, F")

@@ -5,16 +5,15 @@ from filok.dataclassok.lepestipusok import Pozicio
 
 
 class Babu:
-    szinek: ClassVar[dict[str, int]] = {"Fehér": -1, "Fekete": 1}
+    nev: ClassVar[str] = "nincs"
+    gyalog_irany: ClassVar[dict[str, int]] = {"Fehér": -1, "Fekete": 1}
 
     def __init__(
         self,
         szin: str = "nincs",
-        nev: str = "nincs",
         jelenlegi_pozicio: Pozicio | None = None,
     ) -> None:
         self.szin = szin
-        self.nev = nev
         self.jelenlegi_pozicio = (
             jelenlegi_pozicio if jelenlegi_pozicio is not None else Pozicio(-1, -1)
         )
@@ -70,10 +69,6 @@ class Babu:
     def lepes(self) -> list:
         return []
 
-    def __getattr__(self, name):
-        if name == "utes":
-            return self.lepes
-
-        raise AttributeError(
-            f"'{type(self).__name__}' objektumnak nincs '{name}' attribútuma"
-        )
+    def utes(self) -> list:
+        """Alapértelmezetten a bábu oda üthet, ahova léphet."""
+        return self.lepes()

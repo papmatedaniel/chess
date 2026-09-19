@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from filok.dataclassok.lepestipusok import Lepes
 
 
-@dataclass
+@dataclass(slots=True)
 class LepesEredmeny:
     siker: bool
     uzenet: str
-    objektum: Lepes | None
+    objektum: Lepes | None = None

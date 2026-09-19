@@ -23,6 +23,12 @@ class Pozicio:
         sor_szam = str(8 - self.sor)
         return f"{oszlop_betu}{sor_szam}"
 
+    @classmethod
+    def alakit(cls, koordinata) -> "Pozicio":
+        oszlop = ord(koordinata[0].lower()) - ord("a")
+        sor = 8 - int(koordinata[1])
+        return cls(sor=sor, oszlop=oszlop)
+
     def __repr__(self) -> str:
         # Debugoláskor vagy print-nél rögtön mutatja mindkét formátumot
         return f"{self.valos}"

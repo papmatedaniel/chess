@@ -3,8 +3,7 @@ from filok.dataclassok.lepestipusok import Pozicio
 
 
 class Vezer(Babu):
-    def __init__(self) -> None:
-        super().__init__(nev="Vezér")
+    nev = "Vezér"
 
     def lepes(self) -> list[list[Pozicio]]:
         """Hagyományos mozgása a vezérnek."""

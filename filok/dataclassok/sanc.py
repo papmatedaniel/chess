@@ -1,14 +1,13 @@
-from dataclasses import dataclass
 from typing import ClassVar
 
 
-# mehet egybe a sáncszabaly fileval
-@dataclass
 class Sanc:
-    kiraly_honnan = 4
-    babu1: ClassVar[str] = "Bástya"
-    babu2: ClassVar[str] = "Király"
-    sancvalaszto: ClassVar[dict] = {
+    kiraly_honnan: int = 4
+    babu1: str = "Bástya"
+    babu2: str = "Király"
+    szinek: ClassVar[dict[str, int]] = {"Fehér": 7, "Fekete": 0}
+
+    sancvalaszto: ClassVar[dict[str, dict[str, int]]] = {
         "0-0": {
             "kiraly_hova": 6,
             "bastya_honnan": 7,
@@ -20,5 +19,3 @@ class Sanc:
             "bastya_hova": 3,
         },
     }
-
-    szinek: ClassVar[dict] = {"Fehér": 7, "Fekete": 0}

@@ -10,36 +10,25 @@ class BabuSzabaly:
 
         self.szabaly_generatorok = {
             "Gyalog": self.gyalog_generator,
-            "Huszár": lambda tabla, babu: {
-                "lephet": self.altalanosszabalyok.hova_lephet(tabla, babu.lepes()),
-                "uthet": self.altalanosszabalyok.hova_uthet(
-                    tabla, babu.utes(), babu.szin
-                ),
-            },
-            "Futó": lambda tabla, babu: {
-                "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
-                "uthet": self.altalanosszabalyok.hova_uthet_sor(
-                    tabla, babu.utes(), babu.szin
-                ),
-            },
-            "Bástya": lambda tabla, babu: {
-                "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
-                "uthet": self.altalanosszabalyok.hova_uthet_sor(
-                    tabla, babu.utes(), babu.szin
-                ),
-            },
-            "Vezér": lambda tabla, babu: {
-                "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
-                "uthet": self.altalanosszabalyok.hova_uthet_sor(
-                    tabla, babu.utes(), babu.szin
-                ),
-            },
-            "Király": lambda tabla, babu: {
-                "lephet": self.altalanosszabalyok.hova_lephet(tabla, babu.lepes()),
-                "uthet": self.altalanosszabalyok.hova_uthet(
-                    tabla, babu.utes(), babu.szin
-                ),
-            },
+            "Huszár": self.ugro_generator,
+            "Király": self.ugro_generator,
+            "Futó": self.soros_generator,
+            "Bástya": self.soros_generator,
+            "Vezér": self.soros_generator,
+        }
+
+    def soros_generator(self, tabla, babu) -> dict:
+        return {
+            "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
+            "uthet": self.altalanosszabalyok.hova_uthet_sor(
+                tabla, babu.utes(), babu.szin
+            ),
+        }
+
+    def ugro_generator(self, tabla, babu) -> dict:
+        return {
+            "lephet": self.altalanosszabalyok.hova_lephet(tabla, babu.lepes()),
+            "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
         }
 
     def szimilacio_kapcsolo(self) -> None:
@@ -54,20 +43,11 @@ class BabuSzabaly:
         babu,
     ) -> dict:
 
-        if self.gyalog.gyalog_atvaltozhat_e(babu):
-            if self.szimulacio:
-                atvaltozas = self.gyalog.gyalog_atvaltozas("Szimuláció")
-                self.szimilacio_kapcsolo()
-            else:
-                atvaltozas = self.gyalog.gyalog_atvaltozas()
-        else:
-            atvaltozas = None
-
         return {
             "lephet": self.gyalog.gyalog_hova_lephet(tabla, babu),
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
             "enpassant": self.gyalog.gyalog_hova_lephet_enpassant(tabla, babu),
-            "atvaltozas": atvaltozas,
+            "atvaltozas": self.gyalog.gyalog_atvaltozhat_e(babu),
         }
 
     def elerheto_mezok_lekerese(self, tabla, babu) -> dict:
@@ -84,27 +64,36 @@ class BabuSzabaly:
         vegpozicio: Pozicio,
     ) -> LepesEredmeny:
         if not tabla.bentvane(kezdopozicio):
-            return LepesEredmeny(False, "A kezdő koordináta a pályán kívül van", None)
+            return LepesEredmeny(False, "A kezdő koordináta a pályán kívül van")
 
         if not tabla.bentvane(vegpozicio):
-            return LepesEredmeny(False, "A célkoordináta a pályán kívül van", None)
+            return LepesEredmeny(False, "A célkoordináta a pályán kívül van")
 
         if tabla.urese(kezdopozicio):
-            return LepesEredmeny(False, "A kezdő koordinátán nincs bábu", None)
+            return LepesEredmeny(False, "A kezdő koordinátán nincs bábu")
 
         babu = tabla.mezo_lekerdezese(kezdopozicio)
         if sajatszin != babu.szin:
-            return LepesEredmeny(False, "Az ellenfél bábujához nyúltál", None)
+            return LepesEredmeny(False, "Az ellenfél bábujához nyúltál")
 
-        return LepesEredmeny(True, "Minden feltétel megfelel", None)
+        return LepesEredmeny(True, "Minden feltétel megfelel")
 
     def babu_valaszto(
-        self, tabla, babu, kezdopozicio: Pozicio, vegpozicio: Pozicio
+        self,
+        tabla,
+        babu,
+        kezdopozicio: Pozicio,
+        vegpozicio: Pozicio,
+        valasztott_tiszt: str = "Vezér",
     ) -> LepesEredmeny:
         if babu.nev not in self.szabaly_generatorok:
-            return LepesEredmeny(False, "Nincs ilyen bábu", None)
+            return LepesEredmeny(False, "Nincs ilyen bábu")
 
         adatok = self.szabaly_generatorok[babu.nev](tabla, babu)
+
+        # Ha átváltozhat, a megadott típust használjuk (szimulációnál alapértelmezetten Vezér)
+        atvaltozas_tipus = valasztott_tiszt if adatok.get("atvaltozhat") else None
+
         return self.altalanos_lepes_ellenorzo(
             tabla=tabla,
             kezdopozicio=kezdopozicio,
@@ -112,7 +101,7 @@ class BabuSzabaly:
             lephet=adatok.get("lephet", []),
             uthet=adatok.get("uthet", []),
             enpassant=adatok.get("enpassant"),
-            atvaltozott_babu_tipusa=adatok.get("atvaltozas"),
+            atvaltozott_babu_tipusa=atvaltozas_tipus,
         )
 
     def altalanos_lepes_ellenorzo(
@@ -168,7 +157,5 @@ class BabuSzabaly:
             return LepesEredmeny(True, "En passant végrehajtható", lepes)
 
         return LepesEredmeny(
-            False,
-            "A célkoordináta nem egyezik a bábu szabályos lépésével",
-            None,
+            False, "A célkoordináta nem egyezik a bábu szabályos lépésével"
         )
