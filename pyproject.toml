@@ -13,7 +13,7 @@ chess = "chess.main:main"
 dev = [
     "mypy>=1.10.0",
     "pyright>=1.1.370",
-    "ruff>=0.5.0",
+    "ruff>=0.16.8",
 ]
 
 [build-system]
