@@ -1,16 +1,17 @@
-from filok.babuk.babu import Babu
-from filok.dataclassok.lepestipusok import Pozicio
+from typing import ClassVar
+
+from chess.babuk.babu import Babu
+from chess.dataclassok.lepestipusok import Pozicio
 
 
 class Gyalog(Babu):
     nev = "Gyalog"
+    gyalog_irany: ClassVar[dict[str, int]] = {"Fehér": -1, "Fekete": 1}
 
     def utes(self) -> list[Pozicio]:
         """Hagyományos ütés"""
-        lepesek = [
-            (self.gyalog_irany[self.szin], self.gyalog_irany[self.szin]),
-            (-self.gyalog_irany[self.szin], self.gyalog_irany[self.szin]),
-        ]
+        dy = self.gyalog_irany.get(self.szin, 0)
+        lepesek = [(-1, dy), (1, dy)]
         return self.hozzad(lepesek)
 
     def lepes(self) -> list[Pozicio]:
@@ -20,8 +21,6 @@ class Gyalog(Babu):
 
     def elso_lepes(self) -> list[Pozicio]:
         """Első lépés, ami lehet dupla is"""
-        lepesek = [
-            (0, self.gyalog_irany[self.szin]),
-            (0, 2 * self.gyalog_irany[self.szin]),
-        ]
+        dy = self.gyalog_irany.get(self.szin, 0)
+        lepesek = [(0, dy), (0, 2 * dy)]
         return self.hozzad(lepesek)

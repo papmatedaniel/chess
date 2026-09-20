@@ -1,36 +1,17 @@
-from filok.alltalanosszabalyok import Altalanosszabalyok
-from filok.babuszabaly import BabuSzabaly
-from filok.dataclassok.lepestipusok import Pozicio
-from filok.specialis_muveletek.gyalog_lepes import Gyaloglepes
-from filok.specialis_muveletek.kiraly_sakkezeles import Sakkkezeles
-from filok.specialis_muveletek.sancszabaly import SancSzabaly
-from filok.szimulacio import Szimulacio
+from chess.alltalanosszabalyok import Altalanosszabalyok
+from chess.babuszabaly import BabuSzabaly
+from chess.dataclassok.lepestipusok import Pozicio
+from chess.specialis_muveletek.gyalog_lepes import Gyaloglepes
+from chess.specialis_muveletek.kiraly_sakkezeles import Sakkkezeles
+from chess.specialis_muveletek.sancszabaly import SancSzabaly
+from chess.szimulacio import Szimulacio
 
 
 class Jatek:
     """Felhasználói interfész. Kapcsolatot tart a játékossal és vezérli a körmenetet."""
 
-    def __init__(self, tablaobj, lepestipusok) -> None:
-        self.nev1 = ""
-        self.nev2 = ""
+    def __init__(self, tablaobj) -> None:
         self.tablaobj = tablaobj
-        self.lepestipusok = lepestipusok
-
-    def nev_beker(self) -> None:
-        """Bekéri a játékosok nevét."""
-        nevek = ["", ""]
-        for i in range(2):
-            while nevek[i] == "":
-                nev = input(
-                    f"Add meg a(z) {i + 1}. játékos nevét (2-7 karakter): "
-                ).strip()
-                if not (2 <= len(nev) <= 7):
-                    print("2-7 karakter hosszú nevet válassz!")
-                elif nevek[i] == nev or nevek[i - 1] == nev:
-                    print("Ne ugyanazt a nevet add meg, mint a másik játékos!")
-                else:
-                    nevek[i] = nev
-        self.nev1, self.nev2 = nevek[0], nevek[1]
 
     def koordinata_beker(self, bemenet: str) -> tuple[Pozicio, Pozicio]:
         """Bekéri és Pozicio objektumokká alakítja a koordinátákat."""
@@ -100,7 +81,7 @@ class Jatek:
                     print("Hibás koordináta formátum! Használat: 'e2 e4'")
                     continue
 
-                # Alapvető validáció: pályán van-e, van-e ott bábu, saját bábu-e
+                # Alapvető mező- és bábu-ellenőrzés
                 ellenorzes = babu_szabaly.lepes_ellenorzo(
                     self.tablaobj, honnan_poz, soron_kovetkezo, hova_poz
                 )
@@ -110,12 +91,12 @@ class Jatek:
 
                 babu = self.tablaobj.mezo_lekerdezese(honnan_poz)
 
-                # Átváltozás típusának meghatározása éles lépés előtt
+                # Gyalog átváltozás típusának bekérése
                 valasztott_tiszt = "Vezér"
                 if babu.nev == "Gyalog" and gyalog_szabaly.gyalog_atvaltozhat_e(babu):
                     valasztott_tiszt = self.atvaltozas_beker()
 
-                # Fizikai lépéslehetőség vizsgálata (üti-e a sajátját, szabályos irány-e stb.)
+                # Fizikai/geometriai lépéslehetőség ellenőrzése
                 vegrehajtas = babu_szabaly.babu_valaszto(
                     self.tablaobj,
                     babu,
@@ -127,7 +108,7 @@ class Jatek:
                     print(vegrehajtas.uzenet)
                     continue
 
-                # Sakkban maradás vizsgálata a szimulált legális lépések alapján
+                # Király biztonságának ellenőrzése a legális lépéshalmaz alapján
                 if not (
                     honnan_poz in valid_lepesek
                     and hova_poz in valid_lepesek[honnan_poz]

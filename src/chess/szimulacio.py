@@ -1,4 +1,4 @@
-from filok.specialis_muveletek.sancszabaly import SancSzabaly
+from chess.specialis_muveletek.sancszabaly import SancSzabaly
 
 
 class Szimulacio:
@@ -18,7 +18,6 @@ class Szimulacio:
 
     def validlepesek(self, szin) -> dict:
         szotar = {}
-        self.babuszabaly.szimilacio_kapcsolo()
         for sor in self.tabla.tabla:
             for babu in sor:
                 if babu.szin != szin:
@@ -50,7 +49,6 @@ class Szimulacio:
                 if len(jo_lepesek) > 0:
                     szotar[babu.utolsokoord] = jo_lepesek
 
-        self.babuszabaly.szimilacio_kapcsolo()
         return szotar
 
     def valid_sancok(self, szin) -> list:
@@ -60,7 +58,7 @@ class Szimulacio:
 
         for sanc_tipus in ["0-0", "0-0-0"]:
             eredmeny = sancszabaly.sanc_valaszto(sanc_tipus)
-            if eredmeny.siker and self.lepes_tesztelo(eredmeny.objektum, szin):
+            if eredmeny.siker:
                 lista.append(sanc_tipus)
 
         return lista

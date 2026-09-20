@@ -1,12 +1,11 @@
 from collections.abc import Sequence
 from typing import ClassVar
 
-from filok.dataclassok.lepestipusok import Pozicio
+from chess.dataclassok.lepestipusok import Pozicio
 
 
 class Babu:
     nev: ClassVar[str] = "nincs"
-    gyalog_irany: ClassVar[dict[str, int]] = {"Fehér": -1, "Fekete": 1}
 
     def __init__(
         self,
@@ -14,10 +13,10 @@ class Babu:
         jelenlegi_pozicio: Pozicio | None = None,
     ) -> None:
         self.szin = szin
-        self.jelenlegi_pozicio = (
+        kezdo_pozicio = (
             jelenlegi_pozicio if jelenlegi_pozicio is not None else Pozicio(-1, -1)
         )
-        self.koordinatak = [self.jelenlegi_pozicio]
+        self.koordinatak = [kezdo_pozicio]
 
     @property
     def utolsokoord(self) -> Pozicio:
@@ -66,9 +65,9 @@ class Babu:
         ]
         return self.hozzad(lepesek)
 
-    def lepes(self) -> list:
+    def lepes(self) -> list[Pozicio] | list[list[Pozicio]]:
         return []
 
-    def utes(self) -> list:
+    def utes(self) -> list[Pozicio] | list[list[Pozicio]]:
         """Alapértelmezetten a bábu oda üthet, ahova léphet."""
         return self.lepes()

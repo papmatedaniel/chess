@@ -1,4 +1,4 @@
-from filok.babuk.babu import Babu
+from chess.babuk.babu import Babu
 
 
 class UresMezo(Babu):

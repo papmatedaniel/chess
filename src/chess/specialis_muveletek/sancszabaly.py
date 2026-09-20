@@ -1,6 +1,6 @@
-from filok.dataclassok.lepeseredmeny import LepesEredmeny
-from filok.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
-from filok.dataclassok.sanc import Sanc
+from chess.dataclassok.lepeseredmeny import LepesEredmeny
+from chess.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
+from chess.dataclassok.sanc import Sanc
 
 
 class SancSzabaly:
@@ -62,21 +62,13 @@ class SancSzabaly:
         return LepesEredmeny(True, "Sáncolás végrehajtható")
 
     def sanc_koordinatak(self, sanc) -> tuple[Pozicio, Pozicio, Pozicio, Pozicio]:
-        kiraly_honnan = Pozicio(sor=self.sor, oszlop=Sanc.kiraly_honnan)
-        bastya_honnan = Pozicio(
-            sor=self.sor,
-            oszlop=Sanc.sancvalaszto[sanc]["bastya_honnan"],
+        adat = Sanc.sancvalaszto[sanc]
+        return (
+            Pozicio(sor=self.sor, oszlop=Sanc.kiraly_honnan),
+            Pozicio(sor=self.sor, oszlop=adat["bastya_honnan"]),
+            Pozicio(sor=self.sor, oszlop=adat["kiraly_hova"]),
+            Pozicio(sor=self.sor, oszlop=adat["bastya_hova"]),
         )
-        kiraly_hova = Pozicio(
-            sor=self.sor,
-            oszlop=Sanc.sancvalaszto[sanc]["kiraly_hova"],
-        )
-        bastya_hova = Pozicio(
-            sor=self.sor,
-            oszlop=Sanc.sancvalaszto[sanc]["bastya_hova"],
-        )
-
-        return kiraly_honnan, bastya_honnan, kiraly_hova, bastya_hova
 
     def sanc_valaszto(self, sanc) -> LepesEredmeny:
         eredmeny = self.sanc_lephet_e(sanc)

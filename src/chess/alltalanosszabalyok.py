@@ -1,4 +1,4 @@
-from filok.dataclassok.lepestipusok import Pozicio
+from chess.dataclassok.lepestipusok import Pozicio
 
 
 class Altalanosszabalyok:

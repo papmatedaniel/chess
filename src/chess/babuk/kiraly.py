@@ -1,5 +1,5 @@
-from filok.babuk.babu import Babu
-from filok.dataclassok.lepestipusok import Pozicio
+from chess.babuk.babu import Babu
+from chess.dataclassok.lepestipusok import Pozicio
 
 
 class Kiraly(Babu):

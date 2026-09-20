@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from filok.dataclassok.lepestipusok import Lepes
+from chess.dataclassok.lepestipusok import Lepes
 
 
 @dataclass(slots=True)

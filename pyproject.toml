@@ -1,17 +1,20 @@
 [project]
 name = "chess"
 version = "0.1.0"
-description = "Add your description here"
+description = "Terminal-based modular chess engine written in Python"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "mypy>=2.3.1",
-    "pyright>=1.1.411",
-    "ruff>=0.16.3",
-]
+dependencies = []
 
 [project.scripts]
-chess = "chess:main"
+chess = "chess.main:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.10.0",
+    "pyright>=1.1.370",
+    "ruff>=0.5.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
@@ -19,6 +22,18 @@ build-backend = "uv_build"
 
 [tool.ruff]
 target-version = "py312"
+line-length = 88
 
 [tool.ruff.lint]
 extend-ignore = ["SIM105"]
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+strict = true
+ignore_missing_imports = true

@@ -1,12 +1,11 @@
-from filok.dataclassok.lepeseredmeny import LepesEredmeny
-from filok.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
+from chess.dataclassok.lepeseredmeny import LepesEredmeny
+from chess.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 
 
 class BabuSzabaly:
     def __init__(self, altalanosszabalyok, gyalogszabalyok) -> None:
         self.altalanosszabalyok = altalanosszabalyok
         self.gyalog = gyalogszabalyok
-        self.szimulacio = False
 
         self.szabaly_generatorok = {
             "Gyalog": self.gyalog_generator,
@@ -31,12 +30,6 @@ class BabuSzabaly:
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
         }
 
-    def szimilacio_kapcsolo(self) -> None:
-        if self.szimulacio == False:
-            self.szimulacio = True
-        else:
-            self.szimulacio = False
-
     def gyalog_generator(
         self,
         tabla,
@@ -47,7 +40,7 @@ class BabuSzabaly:
             "lephet": self.gyalog.gyalog_hova_lephet(tabla, babu),
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
             "enpassant": self.gyalog.gyalog_hova_lephet_enpassant(tabla, babu),
-            "atvaltozas": self.gyalog.gyalog_atvaltozhat_e(babu),
+            "atvaltozhat": self.gyalog.gyalog_atvaltozhat_e(babu),
         }
 
     def elerheto_mezok_lekerese(self, tabla, babu) -> dict:

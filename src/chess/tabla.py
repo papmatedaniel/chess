@@ -1,7 +1,7 @@
 import copy
 from typing import Any
 
-from filok.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
+from chess.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 
 
 class Tabla:
@@ -88,19 +88,17 @@ class Tabla:
     def _uj_babu_letrehozasa(
         self, pozicio: Pozicio, babutipus: str | None, szin: str
     ) -> None:
-        uj_babu = None
-        if babutipus == "Vezér":
-            uj_babu = copy.deepcopy(self.vezer)
-        elif babutipus == "Bástya":
-            uj_babu = copy.deepcopy(self.bastya)
-        elif babutipus == "Huszár":
-            uj_babu = copy.deepcopy(self.huszar)
-        elif babutipus == "Futó":
-            uj_babu = copy.deepcopy(self.futo)
+        tiszt_prototipusok = {
+            "Vezér": self.vezer,
+            "Bástya": self.bastya,
+            "Huszár": self.huszar,
+            "Futó": self.futo,
+        }
 
-        if uj_babu is None:
+        if babutipus not in tiszt_prototipusok:
             raise ValueError(f"Ismeretlen átváltozási bábutípus: {babutipus}")
 
+        uj_babu = copy.deepcopy(tiszt_prototipusok[babutipus])
         uj_babu.szin = szin
         uj_babu.koordinatak = [pozicio]
         self.tabla[pozicio.sor][pozicio.oszlop] = uj_babu
@@ -161,7 +159,7 @@ class Tabla:
 
             case LepesTipus.UTES:
                 self._visszamozgat_babu(lepes.hova, lepes.honnan)
-                self.mezo_beallitasa(lepes.hova, lepes.levett_babu)
+                self.tabla[lepes.hova.sor][lepes.hova.oszlop] = lepes.levett_babu
 
             case LepesTipus.SANC:
                 assert lepes.bastya_honnan is not None and lepes.bastya_hova is not None
@@ -171,23 +169,26 @@ class Tabla:
             case LepesTipus.EN_PASSANT:
                 assert lepes.levett_babu_pozicio is not None
                 self._visszamozgat_babu(lepes.hova, lepes.honnan)
-                self.mezo_beallitasa(lepes.levett_babu_pozicio, lepes.levett_babu)
+                self.tabla[lepes.levett_babu_pozicio.sor][
+                    lepes.levett_babu_pozicio.oszlop
+                ] = lepes.levett_babu
 
             case LepesTipus.ATVALTOZAS:
                 szin = self.mezo_lekerdezese(lepes.hova).szin
                 self._uresit_mezo(lepes.hova)
                 gyalog = copy.deepcopy(self.gyalog)
                 gyalog.szin = szin
-                gyalog.koordinatak = [lepes.honnan]
-                self.mezo_beallitasa(lepes.honnan, gyalog)
+                # Legalább 2 pozíciót kap a története, hogy soha ne lehessen újra kezdő/duplalépéses
+                gyalog.koordinatak = [Pozicio(-1, -1), lepes.honnan]
+                self.tabla[lepes.honnan.sor][lepes.honnan.oszlop] = gyalog
 
             case LepesTipus.ATVALTOZAS_UTESSEL:
                 szin = self.mezo_lekerdezese(lepes.hova).szin
-                self.mezo_beallitasa(lepes.hova, lepes.levett_babu)
+                self.tabla[lepes.hova.sor][lepes.hova.oszlop] = lepes.levett_babu
                 gyalog = copy.deepcopy(self.gyalog)
                 gyalog.szin = szin
-                gyalog.koordinatak = [lepes.honnan]
-                self.mezo_beallitasa(lepes.honnan, gyalog)
+                gyalog.koordinatak = [Pozicio(-1, -1), lepes.honnan]
+                self.tabla[lepes.honnan.sor][lepes.honnan.oszlop] = gyalog
 
     def tablakiirat(self) -> None:
         szotar = {
@@ -197,7 +198,7 @@ class Tabla:
             "Futó": {"Fehér": "♗", "Fekete": "♝"},
             "Vezér": {"Fehér": "♕", "Fekete": "♛"},
             "Király": {"Fehér": "♔", "Fekete": "♚"},
-            "nincs": {"Fehér": " ", "Fekete": " "},
+            "nincs": {"nincs": " ", "Fehér": " ", "Fekete": " "},
         }
 
         FEKETE_SZIN = "\033[93m"
