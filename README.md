@@ -105,14 +105,14 @@ Ha rendelkezel [`uv`](https://docs.astral.sh/uv/?utm_source=gemini) vagy [`pipx`
 **`uvx` használatával:**
 
 ```bash
-uvx git+https://github.com/FELHASZNALONEV/chess.git
+uvx git+https://github.com/papmatedaniel/chess.git
 
 ```
 
 **`pipx` használatával:**
 
 ```bash
-pipx run --spec git+https://github.com/FELHASZNALONEV/chess.git chess
+pipx run --spec git+https://github.com/papmatedaniel/chess.git chess
 
 ```
 
@@ -122,7 +122,7 @@ pipx run --spec git+https://github.com/FELHASZNALONEV/chess.git chess
 
 1. **Klónozd a tárolót:**
 ```bash
-git clone https://github.com/FELHASZNALONEV/chess.git
+git clone https://github.com/papmatedaniel/chess.git
 cd chess
 
 ```
@@ -143,7 +143,7 @@ uv run chess
 
 1. **Klónozd a tárolót:**
 ```bash
-git clone https://github.com/FELHASZNALONEV/chess.git
+git clone https://github.com/papmatedaniel/chess.git
 cd chess
 
 ```
