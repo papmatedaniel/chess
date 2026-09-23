@@ -71,15 +71,3 @@ Az alábbi táblázat pontosan összefoglalja, mely forrásfájlokban milyen mé
 | `gyalog_lepes.py` | `gyalog_atvaltozhat_e` | Kódgenerálás és refaktorálás | Integrálás a lépésfolyamba és a felhasználói bábuválasztás logikájába. |
 | `lepestipusok.py` | Teljes fájl | `dataclass` adatreprezentáció | Adatstruktúra definiálása a lépésvisszavonáshoz és előzménykezeléshez szükséges mezőkkel. |
 
----
-
-## 3. Telepítés és futtatás
-
-```bash
-# Projekt klónozása
-git clone <repo-url>
-cd sakk-projekt
-
-# Futtatás
-python main.py
-```
