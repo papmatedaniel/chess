@@ -40,13 +40,13 @@ class Sakkkezeles:
         nagylista: list[Pozicio] = []
 
         nagylista.extend(
-            self.altalanosszabalyok.hova_uthet_sor(
+            self.altalanosszabalyok.hova_uthet(
                 self.tabla, ideiglenes_kiraly.ortogonalis_lepes(), szin
             )
         )
 
         nagylista.extend(
-            self.altalanosszabalyok.hova_uthet_sor(
+            self.altalanosszabalyok.hova_uthet(
                 self.tabla, ideiglenes_kiraly.diagonalis_lepes(), szin
             )
         )

@@ -9,22 +9,14 @@ class BabuSzabaly:
 
         self.szabaly_generatorok = {
             "Gyalog": self.gyalog_generator,
-            "Huszár": self.ugro_generator,
-            "Király": self.ugro_generator,
-            "Futó": self.soros_generator,
-            "Bástya": self.soros_generator,
-            "Vezér": self.soros_generator,
+            "Huszár": self.generator,
+            "Király": self.generator,
+            "Futó": self.generator,
+            "Bástya": self.generator,
+            "Vezér": self.generator,
         }
 
-    def soros_generator(self, tabla, babu) -> dict:
-        return {
-            "lephet": self.altalanosszabalyok.hova_lephet_sor(tabla, babu.lepes()),
-            "uthet": self.altalanosszabalyok.hova_uthet_sor(
-                tabla, babu.utes(), babu.szin
-            ),
-        }
-
-    def ugro_generator(self, tabla, babu) -> dict:
+    def generator(self, tabla, babu) -> dict:
         return {
             "lephet": self.altalanosszabalyok.hova_lephet(tabla, babu.lepes()),
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),

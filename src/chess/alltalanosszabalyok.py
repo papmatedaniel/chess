@@ -2,30 +2,7 @@ from chess.dataclassok.lepestipusok import Pozicio
 
 
 class Altalanosszabalyok:
-    def hova_lephet(self, tabla, poziciok: list[Pozicio]) -> list[Pozicio]:
-        jo_poziciok: list[Pozicio] = []
-
-        for poz in poziciok:
-            if tabla.bentvane(poz) and tabla.urese(poz):
-                jo_poziciok.append(poz)
-
-        return jo_poziciok
-
-    def hova_uthet(self, tabla, poziciok: list[Pozicio], szin: str) -> list[Pozicio]:
-        jo_poziciok: list[Pozicio] = []
-
-        for poz in poziciok:
-            if (
-                tabla.bentvane(poz)
-                and not tabla.urese(poz)
-                and tabla.mezo_lekerdezese(poz).szin != szin
-            ):
-                jo_poziciok.append(poz)
-
-        return jo_poziciok
-
-    def hova_lephet_sor(self, tabla, iranyok: list[list[Pozicio]]) -> list[Pozicio]:
-        """Egyenes lépéssorozat üres mezőkre: bástya, futó, vezér."""
+    def hova_lephet(self, tabla, iranyok: list[list[Pozicio]]) -> list[Pozicio]:
         jo_poziciok: list[Pozicio] = []
 
         for irany in iranyok:
@@ -37,10 +14,9 @@ class Altalanosszabalyok:
 
         return jo_poziciok
 
-    def hova_uthet_sor(
+    def hova_uthet(
         self, tabla, iranyok: list[list[Pozicio]], szin: str
     ) -> list[Pozicio]:
-        """Egyenes ütési sorozat: bástya, futó, vezér."""
         jo_poziciok: list[Pozicio] = []
 
         for irany in iranyok:

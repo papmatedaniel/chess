@@ -22,10 +22,10 @@ class Babu:
     def utolsokoord(self) -> Pozicio:
         return self.koordinatak[-1]
 
-    def hozzad(self, eltolasok: Sequence[tuple[int, int]]) -> list[Pozicio]:
+    def hozzad(self, eltolasok: Sequence[tuple[int, int]]) -> list[list[Pozicio]]:
         aktualis = self.utolsokoord
         return [
-            Pozicio(sor=aktualis.sor + dy, oszlop=aktualis.oszlop + dx)
+            [Pozicio(sor=aktualis.sor + dy, oszlop=aktualis.oszlop + dx)]
             for dx, dy in eltolasok
         ]
 
@@ -52,7 +52,7 @@ class Babu:
         lepesek = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
         return self.lepes_hozzad(lepesek)
 
-    def huszar_lepes(self) -> list[Pozicio]:
+    def huszar_lepes(self) -> list[list[Pozicio]]:
         lepesek = [
             (1, 2),
             (2, 1),
@@ -65,9 +65,9 @@ class Babu:
         ]
         return self.hozzad(lepesek)
 
-    def lepes(self) -> list[Pozicio] | list[list[Pozicio]]:
+    def lepes(self) -> list[list[Pozicio]]:
         return []
 
-    def utes(self) -> list[Pozicio] | list[list[Pozicio]]:
+    def utes(self) -> list[list[Pozicio]]:
         """Alapértelmezetten a bábu oda üthet, ahova léphet."""
         return self.lepes()

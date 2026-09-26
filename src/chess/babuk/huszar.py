@@ -5,6 +5,6 @@ from chess.dataclassok.lepestipusok import Pozicio
 class Huszar(Babu):
     nev = "Huszár"
 
-    def lepes(self) -> list[Pozicio]:
+    def lepes(self) -> list[list[Pozicio]]:
         """Hagyományos mozgása a lónak."""
         return self.huszar_lepes()

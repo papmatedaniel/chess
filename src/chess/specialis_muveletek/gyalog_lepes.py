@@ -39,14 +39,15 @@ class Gyaloglepes:
         jo_koordinatak: list[Pozicio] = []
         leveheto_koordinata: Pozicio | None = None
 
-        for cel_poz in babu.utes():
-            if (
-                tabla.bentvane(cel_poz)
-                and tabla.urese(cel_poz)
-                and cel_poz.oszlop == poz1.oszlop
-            ):
-                leveheto_koordinata = utolso.hova
-                jo_koordinatak.append(cel_poz)
+        for cel in babu.utes():
+            for cel_poz in cel:
+                if (
+                    tabla.bentvane(cel_poz)
+                    and tabla.urese(cel_poz)
+                    and cel_poz.oszlop == poz1.oszlop
+                ):
+                    leveheto_koordinata = utolso.hova
+                    jo_koordinatak.append(cel_poz)
 
         return {
             "vegkoordinata": jo_koordinatak,
