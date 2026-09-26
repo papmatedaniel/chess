@@ -1,10 +1,12 @@
 from chess.dataclassok.lepeseredmeny import LepesEredmeny
 from chess.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 from chess.dataclassok.sanc import Sanc
+from chess.specialis_muveletek.kiraly_sakkezeles import Sakkkezeles
+from chess.tabla import Tabla
 
 
 class SancSzabaly:
-    def __init__(self, tabla, szin, sakkezeles) -> None:
+    def __init__(self, tabla: Tabla, szin: str, sakkezeles: Sakkkezeles) -> None:
         self.tabla = tabla
         self.szin = szin
         self.sor = Sanc.szinek[self.szin]
@@ -20,7 +22,7 @@ class SancSzabaly:
         """Megadja, hogy az adott mezők mindegyike üres-e."""
         return all(self.tabla.urese(poz) for poz in poziciok)
 
-    def sanc_lephet_e(self, sanc) -> LepesEredmeny:
+    def sanc_lephet_e(self, sanc: str) -> LepesEredmeny:
         if sanc not in ["0-0", "0-0-0"]:
             return LepesEredmeny(False, "Nem létező sánc típus")
 
@@ -61,7 +63,7 @@ class SancSzabaly:
 
         return LepesEredmeny(True, "Sáncolás végrehajtható")
 
-    def sanc_koordinatak(self, sanc) -> tuple[Pozicio, Pozicio, Pozicio, Pozicio]:
+    def sanc_koordinatak(self, sanc: str) -> tuple[Pozicio, Pozicio, Pozicio, Pozicio]:
         adat = Sanc.sancvalaszto[sanc]
         return (
             Pozicio(sor=self.sor, oszlop=Sanc.kiraly_honnan),
@@ -70,7 +72,7 @@ class SancSzabaly:
             Pozicio(sor=self.sor, oszlop=adat["bastya_hova"]),
         )
 
-    def sanc_valaszto(self, sanc) -> LepesEredmeny:
+    def sanc_valaszto(self, sanc: str) -> LepesEredmeny:
         eredmeny = self.sanc_lephet_e(sanc)
 
         if not eredmeny.siker:

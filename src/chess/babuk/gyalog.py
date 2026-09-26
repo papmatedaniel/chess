@@ -15,12 +15,12 @@ class Gyalog(Babu):
 
     def utes(self) -> list[list[Pozicio]]:
         """Hagyományos ütés"""
-        dy = self.gyalog_irany.get(self.szin, 0)
+        dy = self.gyalog_irany[self.szin]
         lepesek = [(-1, dy), (1, dy)]
         return self.hozzad(lepesek)
 
     def elso_lepes(self) -> list[list[Pozicio]]:
         """Első lépés, ami lehet dupla is"""
-        dy = self.gyalog_irany.get(self.szin, 0)
+        dy = self.gyalog_irany[self.szin]
         lepesek = [(0, dy), (0, 2 * dy)]
         return self.hozzad(lepesek)

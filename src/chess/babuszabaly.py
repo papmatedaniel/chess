@@ -1,13 +1,23 @@
+from collections.abc import Callable
+from typing import Any
+
+from chess.alltalanosszabalyok import Altalanosszabalyok
+from chess.babuk.babu import Babu
+from chess.babuk.gyalog import Gyalog
 from chess.dataclassok.lepeseredmeny import LepesEredmeny
 from chess.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
+from chess.specialis_muveletek.gyalog_lepes import Gyaloglepes
+from chess.tabla import Tabla
 
 
 class BabuSzabaly:
-    def __init__(self, altalanosszabalyok, gyalogszabalyok) -> None:
+    def __init__(
+        self, altalanosszabalyok: Altalanosszabalyok, gyalogszabalyok: Gyaloglepes
+    ) -> None:
         self.altalanosszabalyok = altalanosszabalyok
         self.gyalog = gyalogszabalyok
 
-        self.szabaly_generatorok = {
+        self.szabaly_generatorok: dict[str, Callable[[Tabla, Babu], dict[str, Any]]] = {
             "Gyalog": self.gyalog_generator,
             "Huszár": self.generator,
             "Király": self.generator,
@@ -16,7 +26,7 @@ class BabuSzabaly:
             "Vezér": self.generator,
         }
 
-    def generator(self, tabla, babu) -> dict:
+    def generator(self, tabla: Tabla, babu: Babu) -> dict[str, Any]:
         return {
             "lephet": self.altalanosszabalyok.hova_lephet(tabla, babu.lepes()),
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
@@ -24,9 +34,11 @@ class BabuSzabaly:
 
     def gyalog_generator(
         self,
-        tabla,
-        babu,
-    ) -> dict:
+        tabla: Tabla,
+        babu: Babu,
+    ) -> dict[str, Any]:
+        if not isinstance(babu, Gyalog):
+            return {"lephet": [], "uthet": []}
 
         return {
             "lephet": self.gyalog.gyalog_hova_lephet(tabla, babu),
@@ -35,7 +47,7 @@ class BabuSzabaly:
             "atvaltozhat": self.gyalog.gyalog_atvaltozhat_e(babu),
         }
 
-    def elerheto_mezok_lekerese(self, tabla, babu) -> dict:
+    def elerheto_mezok_lekerese(self, tabla: Tabla, babu: Babu) -> dict[str, Any]:
         generator = self.szabaly_generatorok.get(babu.nev)
         if not generator:
             return {"lephet": [], "uthet": []}
@@ -43,7 +55,7 @@ class BabuSzabaly:
 
     def lepes_ellenorzo(
         self,
-        tabla,
+        tabla: Tabla,
         kezdopozicio: Pozicio,
         sajatszin: str,
         vegpozicio: Pozicio,
@@ -65,8 +77,8 @@ class BabuSzabaly:
 
     def babu_valaszto(
         self,
-        tabla,
-        babu,
+        tabla: Tabla,
+        babu: Babu,
         kezdopozicio: Pozicio,
         vegpozicio: Pozicio,
         valasztott_tiszt: str = "Vezér",
@@ -91,12 +103,12 @@ class BabuSzabaly:
 
     def altalanos_lepes_ellenorzo(
         self,
-        tabla,
+        tabla: Tabla,
         kezdopozicio: Pozicio,
         vegpozicio: Pozicio,
         lephet: list[Pozicio],
         uthet: list[Pozicio],
-        enpassant: dict | None = None,
+        enpassant: dict[str, Any] | None = None,
         atvaltozott_babu_tipusa: str | None = None,
     ) -> LepesEredmeny:
         # 1. Lépés üres mezőre

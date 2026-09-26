@@ -5,12 +5,13 @@ from chess.specialis_muveletek.gyalog_lepes import Gyaloglepes
 from chess.specialis_muveletek.kiraly_sakkezeles import Sakkkezeles
 from chess.specialis_muveletek.sancszabaly import SancSzabaly
 from chess.szimulacio import Szimulacio
+from chess.tabla import Tabla
 
 
 class Jatek:
     """Felhasználói interfész. Kapcsolatot tart a játékossal és vezérli a körmenetet."""
 
-    def __init__(self, tablaobj) -> None:
+    def __init__(self, tablaobj: Tabla) -> None:
         self.tablaobj = tablaobj
 
     def koordinata_beker(self, bemenet: str) -> tuple[Pozicio, Pozicio]:

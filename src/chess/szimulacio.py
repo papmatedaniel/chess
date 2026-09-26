@@ -1,23 +1,30 @@
+from typing import Any
+
+from chess.babuszabaly import BabuSzabaly
+from chess.dataclassok.lepestipusok import Lepes, Pozicio
+from chess.specialis_muveletek.kiraly_sakkezeles import Sakkkezeles
 from chess.specialis_muveletek.sancszabaly import SancSzabaly
+from chess.tabla import Tabla
 
 
 class Szimulacio:
-    def __init__(self, tabla, sakkezeles, babuszabaly):
+    def __init__(
+        self, tabla: Tabla, sakkezeles: Sakkkezeles, babuszabaly: BabuSzabaly
+    ) -> None:
         self.tabla = tabla
         self.sakkezeles = sakkezeles
         self.babuszabaly = babuszabaly
 
-    def lepes_tesztelo(self, lepes, szin) -> bool:
+    def lepes_tesztelo(self, lepes: Lepes, szin: str) -> bool:
         """True-t ad vissza, ha a lépés szabályos (a saját király NINCS sakkban utána)."""
-
         self.tabla.lepes_vegrehajtas(lepes)
         sakkban_maradt = self.sakkezeles.sakkbanvane_vezerlo(szin)
         self.tabla.lepes_visszavonas()
 
         return not sakkban_maradt
 
-    def validlepesek(self, szin) -> dict:
-        szotar = {}
+    def validlepesek(self, szin: str) -> dict[Pozicio, list[Pozicio]]:
+        szotar: dict[Pozicio, list[Pozicio]] = {}
         for sor in self.tabla.tabla:
             for babu in sor:
                 if babu.szin != szin:
@@ -26,7 +33,7 @@ class Szimulacio:
                 osszes_kordinata = self.babuszabaly.elerheto_mezok_lekerese(
                     self.tabla, babu
                 )
-                gyujt = []
+                gyujt: list[Pozicio] = []
                 gyujt.extend(osszes_kordinata.get("lephet", []))
                 gyujt.extend(osszes_kordinata.get("uthet", []))
 
@@ -34,7 +41,7 @@ class Szimulacio:
                 if isinstance(enpassant, dict):
                     gyujt.extend(enpassant.get("vegkoordinata", []))
 
-                jo_lepesek = []
+                jo_lepesek: list[Pozicio] = []
                 for elem in gyujt:
                     lepestipus = self.babuszabaly.babu_valaszto(
                         self.tabla,
@@ -42,7 +49,7 @@ class Szimulacio:
                         babu.utolsokoord,
                         elem,
                     )
-                    if not lepestipus.siker:
+                    if not lepestipus.siker or lepestipus.objektum is None:
                         continue
                     if self.lepes_tesztelo(lepestipus.objektum, szin):
                         jo_lepesek.append(elem)
@@ -51,9 +58,9 @@ class Szimulacio:
 
         return szotar
 
-    def valid_sancok(self, szin) -> list:
+    def valid_sancok(self, szin: str) -> list[str]:
         """Adott színhez tartozó szabályos sáncolási lehetőségek."""
-        lista = []
+        lista: list[str] = []
         sancszabaly = SancSzabaly(self.tabla, szin, self.sakkezeles)
 
         for sanc_tipus in ["0-0", "0-0-0"]:
@@ -63,7 +70,7 @@ class Szimulacio:
 
         return lista
 
-    def szimulacio_ertekelo(self, szin) -> dict:
+    def szimulacio_ertekelo(self, szin: str) -> dict[str, Any]:
         valid_lepesek_szotar = self.validlepesek(szin)
         valid_sanc_lista = self.valid_sancok(szin)
         osszes_lepes_szama = sum(
@@ -86,7 +93,7 @@ class Szimulacio:
             "jatekmehettovabb": jatekmehettovabb,
         }
 
-    def kiirat(self, szin, szotarja):
+    def kiirat(self, szin: str, szotarja: dict[Pozicio, list[Pozicio]]) -> None:
         print(f"A {szin} színhez tartozó összes lehetséges lépése: ")
 
         for k, v in szotarja.items():

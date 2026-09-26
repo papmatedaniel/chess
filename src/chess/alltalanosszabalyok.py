@@ -1,8 +1,9 @@
 from chess.dataclassok.lepestipusok import Pozicio
+from chess.tabla import Tabla
 
 
 class Altalanosszabalyok:
-    def hova_lephet(self, tabla, iranyok: list[list[Pozicio]]) -> list[Pozicio]:
+    def hova_lephet(self, tabla: Tabla, iranyok: list[list[Pozicio]]) -> list[Pozicio]:
         jo_poziciok: list[Pozicio] = []
 
         for irany in iranyok:
@@ -15,7 +16,7 @@ class Altalanosszabalyok:
         return jo_poziciok
 
     def hova_uthet(
-        self, tabla, iranyok: list[list[Pozicio]], szin: str
+        self, tabla: Tabla, iranyok: list[list[Pozicio]], szin: str
     ) -> list[Pozicio]:
         jo_poziciok: list[Pozicio] = []
 

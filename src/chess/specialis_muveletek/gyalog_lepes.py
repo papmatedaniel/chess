@@ -1,8 +1,13 @@
+from typing import Any
+
+from chess.alltalanosszabalyok import Altalanosszabalyok
+from chess.babuk.gyalog import Gyalog
 from chess.dataclassok.lepestipusok import Pozicio
+from chess.tabla import Tabla
 
 
 class Gyaloglepes:
-    def __init__(self, altalanosszabalyok) -> None:
+    def __init__(self, altalanosszabalyok: Altalanosszabalyok) -> None:
         self.altalanosszabalyok = altalanosszabalyok
 
     def gyalog_duplalepese(self, koordinatak: list[Pozicio]) -> bool:
@@ -12,7 +17,9 @@ class Gyaloglepes:
             return p1.oszlop == p2.oszlop and abs(p2.sor - p1.sor) == 2
         return False
 
-    def gyalog_hova_lephet_enpassant(self, tabla, babu) -> dict:
+    def gyalog_hova_lephet_enpassant(
+        self, tabla: Tabla, babu: Gyalog
+    ) -> dict[str, Any]:
         alap_valasz: dict[str, list[Pozicio] | Pozicio | None] = {
             "vegkoordinata": [],
             "leveheto_koordinata": None,
@@ -54,7 +61,7 @@ class Gyaloglepes:
             "leveheto_koordinata": leveheto_koordinata,
         }
 
-    def gyalog_hova_lephet(self, tabla, babu) -> list[Pozicio]:
+    def gyalog_hova_lephet(self, tabla: Tabla, babu: Gyalog) -> list[Pozicio]:
         # ha elotte allo mezo ures, duplalepest probalunk
         szabad_egyes = self.altalanosszabalyok.hova_lephet(tabla, babu.lepes())
         if len(babu.koordinatak) == 1 and len(szabad_egyes) == 1:
@@ -62,7 +69,7 @@ class Gyaloglepes:
 
         return szabad_egyes
 
-    def gyalog_atvaltozhat_e(self, babu) -> bool:
+    def gyalog_atvaltozhat_e(self, babu: Gyalog) -> bool:
         # (fehérsor=0, feketesor=7) alapsorra érve változik át
         cel_sor = 0 if babu.szin == "Fehér" else 7
         # Ha a következő lépésével eléri a túloldalt

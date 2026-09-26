@@ -1,18 +1,18 @@
 import copy
 from typing import Any
 
+from chess.babuk.bastya import Bastya
+from chess.babuk.futo import Futo
+from chess.babuk.gyalog import Gyalog
+from chess.babuk.huszar import Huszar
+from chess.babuk.kiraly import Kiraly
+from chess.babuk.ures import UresMezo
+from chess.babuk.vezer import Vezer
 from chess.dataclassok.lepestipusok import Lepes, LepesTipus, Pozicio
 
 
 class Tabla:
-    def __init__(self, *, mezo, gyalog, huszar, futo, bastya, vezer, kiraly) -> None:
-        self.mezo = mezo
-        self.gyalog = gyalog
-        self.huszar = huszar
-        self.futo = futo
-        self.bastya = bastya
-        self.vezer = vezer
-        self.kiraly = kiraly
+    def __init__(self) -> None:
 
         self.tabla: list[list[Any]] = []
         self.lepesek: list[Lepes] = []
@@ -20,14 +20,14 @@ class Tabla:
     def tablageneralas(self) -> None:
         """Teljes sakk kezdőállás legenerálása deklaratív sablon alapján."""
         tiszt_sablon = [
-            self.bastya,
-            self.huszar,
-            self.futo,
-            self.vezer,
-            self.kiraly,
-            self.futo,
-            self.huszar,
-            self.bastya,
+            Bastya,
+            Huszar,
+            Futo,
+            Vezer,
+            Kiraly,
+            Futo,
+            Huszar,
+            Bastya,
         ]
 
         for y in range(8):
@@ -36,21 +36,16 @@ class Tabla:
                 poz = Pozicio(sor=y, oszlop=x)
 
                 if y == 0:  # Fekete tisztek
-                    babu = copy.deepcopy(tiszt_sablon[x])
-                    babu.szin = "Fekete"
+                    babu = tiszt_sablon[x](szin="Fekete", jelenlegi_pozicio=poz)
                 elif y == 1:  # Fekete gyalogok
-                    babu = copy.deepcopy(self.gyalog)
-                    babu.szin = "Fekete"
+                    babu = Gyalog(szin="Fekete", jelenlegi_pozicio=poz)
                 elif y == 6:  # Fehér gyalogok
-                    babu = copy.deepcopy(self.gyalog)
-                    babu.szin = "Fehér"
+                    babu = Gyalog(szin="Fehér", jelenlegi_pozicio=poz)
                 elif y == 7:  # Fehér tisztek
-                    babu = copy.deepcopy(tiszt_sablon[x])
-                    babu.szin = "Fehér"
+                    babu = tiszt_sablon[x](szin="Fehér", jelenlegi_pozicio=poz)
                 else:  # Üres mező
-                    babu = copy.deepcopy(self.mezo)
+                    babu = UresMezo(jelenlegi_pozicio=poz)
 
-                babu.koordinatak = [poz]
                 sor.append(babu)
 
             self.tabla.append(sor)
@@ -65,7 +60,7 @@ class Tabla:
 
     def urese(self, pozicio: Pozicio) -> bool:
         """Ellenőrzi, hogy a megadott mező üres-e."""
-        return self.tabla[pozicio.sor][pozicio.oszlop].nev == "nincs"
+        return bool(self.tabla[pozicio.sor][pozicio.oszlop].nev == "nincs")
 
     def mezo_lekerdezese(self, pozicio: Pozicio) -> Any:
         return self.tabla[pozicio.sor][pozicio.oszlop]
@@ -76,7 +71,7 @@ class Tabla:
             babu.koordinatak.append(pozicio)
 
     def _uresit_mezo(self, pozicio: Pozicio) -> None:
-        uj_ures = copy.deepcopy(self.mezo)
+        uj_ures = UresMezo()
         uj_ures.koordinatak = [pozicio]
         self.tabla[pozicio.sor][pozicio.oszlop] = uj_ures
 
@@ -89,10 +84,10 @@ class Tabla:
         self, pozicio: Pozicio, babutipus: str | None, szin: str
     ) -> None:
         tiszt_prototipusok = {
-            "Vezér": self.vezer,
-            "Bástya": self.bastya,
-            "Huszár": self.huszar,
-            "Futó": self.futo,
+            "Vezér": Vezer,
+            "Bástya": Bastya,
+            "Huszár": Huszar,
+            "Futó": Futo,
         }
 
         if babutipus not in tiszt_prototipusok:
@@ -176,7 +171,7 @@ class Tabla:
             case LepesTipus.ATVALTOZAS:
                 szin = self.mezo_lekerdezese(lepes.hova).szin
                 self._uresit_mezo(lepes.hova)
-                gyalog = copy.deepcopy(self.gyalog)
+                gyalog = Gyalog()
                 gyalog.szin = szin
                 # Legalább 2 pozíciót kap a története, hogy soha ne lehessen újra kezdő/duplalépéses
                 gyalog.koordinatak = [Pozicio(-1, -1), lepes.honnan]
@@ -185,7 +180,7 @@ class Tabla:
             case LepesTipus.ATVALTOZAS_UTESSEL:
                 szin = self.mezo_lekerdezese(lepes.hova).szin
                 self.tabla[lepes.hova.sor][lepes.hova.oszlop] = lepes.levett_babu
-                gyalog = copy.deepcopy(self.gyalog)
+                gyalog = Gyalog()
                 gyalog.szin = szin
                 gyalog.koordinatak = [Pozicio(-1, -1), lepes.honnan]
                 self.tabla[lepes.honnan.sor][lepes.honnan.oszlop] = gyalog

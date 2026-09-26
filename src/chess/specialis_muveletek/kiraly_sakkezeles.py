@@ -1,9 +1,13 @@
+from typing import Any, cast
+
+from chess.alltalanosszabalyok import Altalanosszabalyok
 from chess.babuk.babu import Babu
 from chess.dataclassok.lepestipusok import Pozicio
+from chess.tabla import Tabla
 
 
 class Sakkkezeles:
-    def __init__(self, tabla, altalanosszabalyok) -> None:
+    def __init__(self, tabla: Tabla, altalanosszabalyok: Altalanosszabalyok) -> None:
         self.tabla = tabla
         self.altalanosszabalyok = altalanosszabalyok
 
@@ -17,10 +21,10 @@ class Sakkkezeles:
         for sor in self.tabla.tabla:
             for babu in sor:
                 if babu.nev == "Király" and babu.szin == szin:
-                    return babu.utolsokoord
+                    return cast(Pozicio, babu.utolsokoord)
         return Pozicio(-1, -1)
 
-    def lebont(self, koordinatalista) -> list[Pozicio]:
+    def lebont(self, koordinatalista: list[Any]) -> list[Pozicio]:
         """1 vagy 2 dimenziós listákat egységesít"""
         lista: list[Pozicio] = []
         for elemek in koordinatalista:

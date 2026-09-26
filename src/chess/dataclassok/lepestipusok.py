@@ -24,7 +24,7 @@ class Pozicio:
         return f"{oszlop_betu}{sor_szam}"
 
     @classmethod
-    def alakit(cls, koordinata) -> "Pozicio":
+    def alakit(cls, koordinata: str) -> "Pozicio":
         oszlop = ord(koordinata[0].lower()) - ord("a")
         sor = 8 - int(koordinata[1])
         return cls(sor=sor, oszlop=oszlop)

@@ -3,8 +3,6 @@ from typing import ClassVar
 
 class Sanc:
     kiraly_honnan: int = 4
-    babu1: str = "Bástya"
-    babu2: str = "Király"
     szinek: ClassVar[dict[str, int]] = {"Fehér": 7, "Fekete": 0}
 
     sancvalaszto: ClassVar[dict[str, dict[str, int]]] = {
