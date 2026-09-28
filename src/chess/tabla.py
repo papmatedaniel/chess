@@ -1,4 +1,3 @@
-import copy
 from typing import Any
 
 from chess.babuk.bastya import Bastya
@@ -93,9 +92,7 @@ class Tabla:
         if babutipus not in tiszt_prototipusok:
             raise ValueError(f"Ismeretlen átváltozási bábutípus: {babutipus}")
 
-        uj_babu = copy.deepcopy(tiszt_prototipusok[babutipus])
-        uj_babu.szin = szin
-        uj_babu.koordinatak = [pozicio]
+        uj_babu = tiszt_prototipusok[babutipus](szin=szin, jelenlegi_pozicio=pozicio)
         self.tabla[pozicio.sor][pozicio.oszlop] = uj_babu
 
     # ---------------------------------------------------------
@@ -118,12 +115,7 @@ class Tabla:
                 self._uresit_mezo(lepes.levett_babu_pozicio)
                 self._mozgat_babu(lepes.honnan, lepes.hova)
 
-            case LepesTipus.ATVALTOZAS:
-                szin = self.mezo_lekerdezese(lepes.honnan).szin
-                self._uresit_mezo(lepes.honnan)
-                self._uj_babu_letrehozasa(lepes.hova, lepes.uj_babu_tipus, szin)
-
-            case LepesTipus.ATVALTOZAS_UTESSEL:
+            case LepesTipus.ATVALTOZAS | LepesTipus.ATVALTOZAS_UTESSEL:
                 szin = self.mezo_lekerdezese(lepes.honnan).szin
                 self._uresit_mezo(lepes.honnan)
                 self._uj_babu_letrehozasa(lepes.hova, lepes.uj_babu_tipus, szin)

@@ -94,7 +94,9 @@ class Jatek:
 
                 # Gyalog átváltozás típusának bekérése
                 valasztott_tiszt = "Vezér"
-                if babu.nev == "Gyalog" and gyalog_szabaly.gyalog_atvaltozhat_e(babu):
+                if babu.nev == "Gyalog" and gyalog_szabaly.gyalog_atvaltozhat_e(
+                    self.tablaobj, babu, hova_poz
+                ):
                     valasztott_tiszt = self.atvaltozas_beker()
 
                 # Fizikai/geometriai lépéslehetőség ellenőrzése

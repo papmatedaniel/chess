@@ -69,9 +69,13 @@ class Gyaloglepes:
 
         return szabad_egyes
 
-    def gyalog_atvaltozhat_e(self, babu: Gyalog) -> bool:
+    def gyalog_atvaltozhat_e(
+        self, tabla: Tabla, babu: Gyalog, hova: Pozicio | None = None
+    ) -> bool:
         # (fehérsor=0, feketesor=7) alapsorra érve változik át
         cel_sor = 0 if babu.szin == "Fehér" else 7
         # Ha a következő lépésével eléri a túloldalt
         kovetkezo_sor = babu.utolsokoord.sor + babu.gyalog_irany[babu.szin]
-        return kovetkezo_sor == cel_sor
+        lepes = self.altalanosszabalyok.hova_lephet(tabla, babu.lepes())
+        utes = self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin)
+        return kovetkezo_sor == cel_sor and (hova in lepes or hova in utes)

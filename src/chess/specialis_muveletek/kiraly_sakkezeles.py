@@ -28,10 +28,7 @@ class Sakkkezeles:
         """1 vagy 2 dimenziós listákat egységesít"""
         lista: list[Pozicio] = []
         for elemek in koordinatalista:
-            if isinstance(elemek, list):
-                lista.extend(elemek)
-            else:
-                lista.append(elemek)
+            lista.extend(elemek)
         return lista
 
     def kiraly_sakkban_vane(self, kiraly_pozicio: Pozicio, szin: str) -> bool:

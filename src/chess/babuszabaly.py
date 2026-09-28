@@ -44,7 +44,7 @@ class BabuSzabaly:
             "lephet": self.gyalog.gyalog_hova_lephet(tabla, babu),
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
             "enpassant": self.gyalog.gyalog_hova_lephet_enpassant(tabla, babu),
-            "atvaltozhat": self.gyalog.gyalog_atvaltozhat_e(babu),
+            "atvaltozhat": self.gyalog.gyalog_atvaltozhat_e(tabla, babu),
         }
 
     def elerheto_mezok_lekerese(self, tabla: Tabla, babu: Babu) -> dict[str, Any]:
