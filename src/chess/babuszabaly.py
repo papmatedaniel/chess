@@ -44,7 +44,6 @@ class BabuSzabaly:
             "lephet": self.gyalog.gyalog_hova_lephet(tabla, babu),
             "uthet": self.altalanosszabalyok.hova_uthet(tabla, babu.utes(), babu.szin),
             "enpassant": self.gyalog.gyalog_hova_lephet_enpassant(tabla, babu),
-            "atvaltozhat": self.gyalog.gyalog_atvaltozhat_e(tabla, babu),
         }
 
     def elerheto_mezok_lekerese(self, tabla: Tabla, babu: Babu) -> dict[str, Any]:
@@ -83,14 +82,16 @@ class BabuSzabaly:
         vegpozicio: Pozicio,
         valasztott_tiszt: str = "Vezér",
     ) -> LepesEredmeny:
-        if babu.nev not in self.szabaly_generatorok:
+        generator = self.szabaly_generatorok.get(babu.nev)
+        if not generator:
             return LepesEredmeny(False, "Nincs ilyen bábu")
 
-        adatok = self.szabaly_generatorok[babu.nev](tabla, babu)
+        adatok = generator(tabla, babu)
 
-        # Ha átváltozhat, a megadott típust használjuk (szimulációnál alapértelmezetten Vezér)
-        atvaltozas_tipus = valasztott_tiszt if adatok.get("atvaltozhat") else None
-
+        # Pontosan akkor van átváltozás, ha Gyalogról van szó, ÉS a célmező a túlsó alapsor:
+        cel_alapsor = 0 if babu.szin == "Fehér" else 7
+        atvaltozik = (babu.nev == "Gyalog") and (vegpozicio.sor == cel_alapsor)
+        atvaltozas_tipus = valasztott_tiszt if atvaltozik else None
         return self.altalanos_lepes_ellenorzo(
             tabla=tabla,
             kezdopozicio=kezdopozicio,
